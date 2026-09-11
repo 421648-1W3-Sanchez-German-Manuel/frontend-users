@@ -1,0 +1,239 @@
+import { ChangeDetectionStrategy, Component, OnDestroy, computed, signal } from '@angular/core';
+
+/** Un mail ya masticado por el buzon: o trae codigo, o trae enlace. */
+interface MailDev {
+  id: string;
+  para: string | null;
+  asunto: string | null;
+  tipo: string | null;
+  fecha: string;
+  codigo: string | null;
+  enlace: string | null;
+}
+
+const ENDPOINT = '/dev/mailbox';
+const REFRESCO_MS = 5000;
+
+/**
+ * Buzon flotante de desarrollo.
+ *
+ * No hay servidor de mail en el stack: los codigos de 2FA y los enlaces de
+ * activacion y de reset quedan en la tabla `outbox_events`. Sin esto, seguir
+ * cualquier flujo a mano exige un `docker compose exec mysql` con un SELECT y
+ * un grep, que es exactamente la friccion que hace que nadie pruebe los flujos.
+ *
+ * ⛔ Es una herramienta de DESARROLLO y muestra codigos de cualquier cuenta.
+ *
+ * Por eso no se dibuja solo porque si: pregunta por `/dev/mailbox` y si no
+ * contesta -que es lo que pasa en cualquier despliegue que no tenga el
+ * contenedor `dev-mailbox`- el boton nunca aparece. Deteccion por capacidad y
+ * no una bandera de build: una bandera hay que acordarse de apagarla.
+ */
+@Component({
+  selector: 'fu-dev-mailbox',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    @if (disponible()) {
+      <div class="fixed bottom-4 right-4 z-[90] flex flex-col items-end gap-2">
+        @if (abierto()) {
+          <section
+            class="fu-card !p-0 w-[min(26rem,calc(100vw-2rem))] max-h-[min(32rem,70vh)] flex flex-col overflow-hidden"
+            style="animation: fu-pop-in 0.15s ease-out"
+            aria-label="Buzon de desarrollo"
+          >
+            <header
+              class="flex items-center gap-2 px-3 py-2 shrink-0"
+              style="border-bottom: 1px solid var(--color-border)"
+            >
+              <span class="text-sm">📬</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm" style="color: var(--color-text)">Buzón de desarrollo</p>
+                <p class="text-xs" style="color: var(--color-text-faint)">
+                  No hay servidor de mail: esto sale del outbox
+                </p>
+              </div>
+              <button
+                type="button"
+                class="text-xs opacity-60 hover:opacity-100 transition-opacity"
+                (click)="refrescar()"
+                aria-label="Actualizar"
+                title="Actualizar"
+              >
+                ⟳
+              </button>
+              <button
+                type="button"
+                class="text-xs opacity-60 hover:opacity-100 transition-opacity"
+                (click)="abierto.set(false)"
+                aria-label="Cerrar buzón"
+              >
+                ✕
+              </button>
+            </header>
+
+            <div class="px-3 py-2 shrink-0" style="border-bottom: 1px solid var(--color-border)">
+              <input
+                class="fu-input !py-1 text-xs"
+                type="search"
+                placeholder="Filtrar por email"
+                [value]="filtro()"
+                (input)="alFiltrar($event)"
+                aria-label="Filtrar por email"
+              />
+            </div>
+
+            <div class="overflow-y-auto flex-1">
+              @if (error()) {
+                <p class="p-4 text-xs" style="color: var(--color-danger)">{{ error() }}</p>
+              } @else if (visibles().length === 0) {
+                <p class="p-4 text-xs" style="color: var(--color-text-muted)">
+                  Nada todavía. Registrate o pedí un código y aparece acá.
+                </p>
+              } @else {
+                <ul>
+                  @for (mail of visibles(); track mail.id) {
+                    <li class="px-3 py-2" style="border-bottom: 1px solid var(--color-border)">
+                      <div class="flex items-baseline gap-2">
+                        <span class="text-xs truncate flex-1" style="color: var(--color-text)">{{ mail.para }}</span>
+                        <span class="text-xs shrink-0" style="color: var(--color-text-faint)">{{ hora(mail.fecha) }}</span>
+                      </div>
+                      <p class="text-xs mt-0.5" style="color: var(--color-text-faint)">{{ etiqueta(mail.tipo) }}</p>
+
+                      @if (mail.codigo) {
+                        <div class="mt-1.5 flex items-center gap-2">
+                          <code class="text-base tracking-[0.3em]" style="color: var(--color-cyan)">{{ mail.codigo }}</code>
+                          <button type="button" class="fu-btn fu-btn--sm fu-btn--ghost" (click)="copiar(mail.codigo!, mail.id)">
+                            {{ copiado() === mail.id ? '✓ copiado' : 'copiar' }}
+                          </button>
+                        </div>
+                      }
+
+                      @if (mail.enlace) {
+                        <div class="mt-1.5 flex items-center gap-2">
+                          <a
+                            class="text-xs truncate flex-1 underline"
+                            style="color: var(--color-cyan)"
+                            [href]="mail.enlace"
+                          >{{ mail.enlace }}</a>
+                          <button type="button" class="fu-btn fu-btn--sm fu-btn--ghost" (click)="copiar(mail.enlace!, mail.id)">
+                            {{ copiado() === mail.id ? '✓' : 'copiar' }}
+                          </button>
+                        </div>
+                      }
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </section>
+        }
+
+        <button
+          type="button"
+          class="fu-btn fu-btn--sm fu-btn--secondary shadow-lg"
+          (click)="abierto.set(!abierto())"
+          [attr.aria-expanded]="abierto()"
+          aria-label="Buzón de desarrollo"
+        >
+          📬 Buzón
+          @if (!abierto() && mails().length) {
+            <span class="fu-badge fu-badge--primary ml-1">{{ mails().length }}</span>
+          }
+        </button>
+      </div>
+    }
+  `,
+})
+export class DevMailbox implements OnDestroy {
+  protected readonly disponible = signal(false);
+  protected readonly abierto = signal(false);
+  protected readonly mails = signal<MailDev[]>([]);
+  protected readonly filtro = signal('');
+  protected readonly error = signal<string | null>(null);
+  protected readonly copiado = signal<string | null>(null);
+
+  protected readonly visibles = computed(() => {
+    const f = this.filtro().trim().toLowerCase();
+    return f ? this.mails().filter((m) => m.para?.toLowerCase().includes(f)) : this.mails();
+  });
+
+  private timer?: ReturnType<typeof setInterval>;
+
+  constructor() {
+    // Una sola consulta al arrancar decide si el buzon existe en este entorno.
+    // Si falla, el componente no vuelve a intentar y no deja rastro en la UI.
+    void this.cargar(true);
+  }
+
+  ngOnDestroy(): void {
+    this.detener();
+  }
+
+  protected refrescar(): void {
+    void this.cargar(false);
+  }
+
+  protected alFiltrar(evento: Event): void {
+    this.filtro.set((evento.target as HTMLInputElement).value);
+  }
+
+  protected async copiar(texto: string, id: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(texto);
+      this.copiado.set(id);
+      setTimeout(() => this.copiado.set(null), 1200);
+    } catch {
+      // Sin permiso de portapapeles (pasa fuera de https): el texto igual se ve
+      // en pantalla y se puede seleccionar a mano. No vale un error en la UI.
+    }
+  }
+
+  protected hora(fecha: string): string {
+    const d = new Date(fecha);
+    return Number.isNaN(d.getTime()) ? '' : d.toLocaleTimeString('es-AR', { hour12: false });
+  }
+
+  /** Los eventType del backend, en algo que se lea de un vistazo. */
+  protected etiqueta(tipo: string | null): string {
+    return (
+      {
+        EMAIL_2FA: 'Código de acceso',
+        EMAIL_ACTIVACION_CUENTA: 'Activación de cuenta',
+        EMAIL_RESET_PASSWORD: 'Recuperar contraseña',
+        WHITELISTING_RESOLVED: 'Padrón resuelto',
+      }[tipo ?? ''] ?? (tipo ?? 'Mail')
+    );
+  }
+
+  private async cargar(primera: boolean): Promise<void> {
+    try {
+      const res = await fetch(`${ENDPOINT}?limit=20`, { headers: { Accept: 'application/json' } });
+      if (!res.ok) throw new Error(String(res.status));
+
+      this.mails.set(await res.json());
+      this.error.set(null);
+
+      if (primera) {
+        this.disponible.set(true);
+        // Recien ahora se empieza a consultar en bucle: en un entorno sin buzon
+        // no queda un intervalo pegandole a un 404 para siempre.
+        this.timer = setInterval(() => {
+          if (this.abierto()) void this.cargar(false);
+        }, REFRESCO_MS);
+      }
+    } catch {
+      if (primera) {
+        // No hay buzon en este entorno. Es lo esperado en cualquier despliegue
+        // real, asi que no se loguea ni se muestra nada.
+        this.disponible.set(false);
+        return;
+      }
+      this.error.set('El buzón no responde. ¿Está levantado el contenedor dev-mailbox?');
+    }
+  }
+
+  private detener(): void {
+    if (this.timer) clearInterval(this.timer);
+  }
+}
