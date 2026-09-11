@@ -97,14 +97,19 @@ export interface MeResponse {
   id: string;
   firstNames: string;
   lastNames: string;
-  email: string;
   legajo?: string;
-  roles: Role[];
+  email: string;
+  role: Role;
   accountStatus: AccountStatus;
   mustChangePassword: boolean;
   firstLogin: boolean;
+  guidedTourCompleted: boolean;
   githubUsername?: string;
   avatarRef?: string | null;
+  emailVerified: boolean;
+  createdAt?: string;
+  termsAcceptedAt?: string;
+  termsVersion?: string;
 }
 
 export interface PublicProfile {

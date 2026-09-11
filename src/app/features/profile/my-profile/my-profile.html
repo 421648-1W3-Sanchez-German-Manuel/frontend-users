@@ -17,30 +17,38 @@
       </div>
 
       <div class="flex flex-wrap gap-2 mb-6">
-        @for (role of me.roles; track role) {
-          <span class="fu-badge fu-badge--primary">{{ roleLabel(role) }}</span>
-        }
+        <span class="fu-badge fu-badge--primary">{{ roleLabel(me.role) }}</span>
         <span
           class="fu-badge"
-          [class.fu-badge--success]="me.accountStatus === 'ACTIVE'"
-          [class.fu-badge--warning]="me.accountStatus !== 'ACTIVE'"
+          [class.fu-badge--success]="statusIsActive(me.accountStatus)"
+          [class.fu-badge--warning]="!statusIsActive(me.accountStatus)"
         >
-          {{ me.accountStatus }}
+          {{ statusLabel(me.accountStatus) }}
         </span>
+        @if (me.emailVerified) {
+          <span class="fu-badge fu-badge--success">Email verificado</span>
+        } @else {
+          <span class="fu-badge fu-badge--warning">Email sin verificar</span>
+        }
+        @if (me.guidedTourCompleted) {
+          <span class="fu-badge">Onboarding completado</span>
+        }
       </div>
 
       <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-        @if (me.legajo) {
+        @for (row of details(); track row.label) {
           <div>
-            <dt style="color: var(--color-text-faint)">Legajo</dt>
-            <dd class="font-medium" style="color: var(--color-text)">{{ me.legajo }}</dd>
+            <dt style="color: var(--color-text-faint)">{{ row.label }}</dt>
+            <dd class="font-medium break-all" style="color: var(--color-text)">{{ row.value }}</dd>
           </div>
         }
-        <div>
-          <dt style="color: var(--color-text-faint)">GitHub</dt>
-          <dd class="font-medium" style="color: var(--color-text)">{{ me.githubUsername || '—' }}</dd>
-        </div>
       </dl>
+
+      @if (me.mustChangePassword) {
+        <div class="mt-6 fu-card !p-4 text-sm" style="color: var(--color-danger); border-color: var(--color-danger)">
+          Te pedimos cambiar tu contraseña en el próximo ingreso.
+        </div>
+      }
 
       <a routerLink="/cambiar-password" class="fu-btn fu-btn--secondary mt-8 w-full sm:w-auto">Cambiar contraseña</a>
     </div>
