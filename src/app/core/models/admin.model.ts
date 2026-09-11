@@ -52,6 +52,13 @@ export interface AddEmailRequest {
   email: string;
 }
 
+/** Row of the whitelist itself (admin CRUD) — GET /api/users/whitelist. */
+export interface WhitelistEntry {
+  id: string;
+  email: string;
+  createdAt?: string;
+}
+
 /** Matches the backend `ResolveWhitelistRequest` record. */
 export interface ReviewWhitelistRequest {
   approve: boolean;

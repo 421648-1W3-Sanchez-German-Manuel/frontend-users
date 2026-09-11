@@ -10,6 +10,7 @@ import {
   CreateWhitelistRequest,
   DeleteUserRequest,
   ReviewWhitelistRequest,
+  WhitelistEntry,
   WhitelistRequest,
 } from '../models/admin.model';
 
@@ -41,6 +42,16 @@ export class AdminService {
   /** ADMIN direct add — POST /api/users/whitelist (DEC-29). */
   addEmailToWhitelist(body: AddEmailRequest): Observable<{ id: string }> {
     return this.http.post<{ id: string }>(API.whitelist, body);
+  }
+
+  /** ADMIN whitelist contents — GET /api/users/whitelist. */
+  listWhitelist(): Observable<WhitelistEntry[]> {
+    return this.http.get<WhitelistEntry[]>(API.whitelist);
+  }
+
+  /** ADMIN remove from whitelist — DELETE /api/users/whitelist/{id}. */
+  removeWhitelistEntry(id: string): Observable<void> {
+    return this.http.delete<void>(`${API.whitelist}/${id}`);
   }
 
   /** ADMIN review queue — GET /api/users/whitelist/requests (DEC-29). */

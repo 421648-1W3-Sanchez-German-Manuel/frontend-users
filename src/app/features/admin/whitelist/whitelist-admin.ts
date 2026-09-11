@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 import { AdminService } from '../../../core/services/admin.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { ReviewWhitelistRequest, WhitelistRequest } from '../../../core/models/admin.model';
+import { ReviewWhitelistRequest, WhitelistEntry, WhitelistRequest } from '../../../core/models/admin.model';
 import { Spinner } from '../../../shared/ui/spinner/spinner';
 import { FuButton } from '../../../shared/ui/button/button';
 
@@ -24,12 +24,15 @@ export class WhitelistAdmin {
   protected readonly rejectionReasons = signal<Record<string, string>>({});
   protected readonly directEmail = signal('');
   protected readonly adding = signal(false);
+  protected readonly entries = signal<WhitelistEntry[] | null | undefined>(undefined);
+  protected readonly removingId = signal<string | null>(null);
 
   protected readonly pending = computed(() => this.requests()?.filter((r) => r.status === 'PENDING') ?? []);
   protected readonly resolved = computed(() => this.requests()?.filter((r) => r.status !== 'PENDING') ?? []);
 
   constructor() {
     this.load();
+    this.loadEntries();
   }
 
   protected addDirect(email: string): void {
@@ -45,12 +48,37 @@ export class WhitelistAdmin {
         this.adding.set(false);
         this.directEmail.set('');
         this.toast.success('Email habilitado en la whitelist');
+        this.loadEntries();
       },
       error: () => {
         this.adding.set(false);
         this.toast.error('No pudimos habilitar el email');
       },
     });
+  }
+
+  protected removeEntry(entry: WhitelistEntry): void {
+    if (this.removingId()) return;
+    this.removingId.set(entry.id);
+    this.adminService.removeWhitelistEntry(entry.id).subscribe({
+      next: () => {
+        this.removingId.set(null);
+        this.toast.success('Email quitado de la whitelist');
+        this.loadEntries();
+      },
+      error: () => {
+        this.removingId.set(null);
+        this.toast.error('No pudimos quitar el email');
+      },
+    });
+  }
+
+  private loadEntries(): void {
+    this.entries.set(undefined);
+    this.adminService
+      .listWhitelist()
+      .pipe(catchError(() => of(null)))
+      .subscribe((list) => this.entries.set(list));
   }
 
   setRejectionReason(id: string, value: string): void {

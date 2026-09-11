@@ -22,6 +22,61 @@
     </div>
   </div>
 
+  <h2 class="text-base mb-3" style="color: var(--color-text)">Emails habilitados</h2>
+
+  @if (entries() === undefined) {
+    <div class="flex justify-center py-8"><fu-spinner [size]="24" /></div>
+  } @else if (entries() === null) {
+    <div class="fu-card !p-6 text-center" style="color: var(--color-danger)">
+      No pudimos cargar la whitelist.
+    </div>
+  } @else {
+    @if (entries()!.length === 0) {
+      <div class="fu-card !p-6 text-center" style="color: var(--color-text-faint)">
+        Todavía no hay emails habilitados.
+      </div>
+    } @else {
+      <div class="fu-card !p-0 overflow-hidden mb-8">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr style="background: var(--color-surface-2)">
+                <th class="text-left px-5 py-3 font-semibold" style="color: var(--color-text-muted)">Email</th>
+                <th class="text-left px-5 py-3 font-semibold" style="color: var(--color-text-muted)">Agregado</th>
+                <th class="text-right px-5 py-3 font-semibold" style="color: var(--color-text-muted)">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of entries()!; track entry.id) {
+                <tr class="border-t" style="border-color: var(--color-border)">
+                  <td class="px-5 py-3 break-all" style="color: var(--color-text)">{{ entry.email }}</td>
+                  <td class="px-5 py-3" style="color: var(--color-text-muted)">
+                    @if (entry.createdAt) {
+                      {{ entry.createdAt | date: "dd/MM/yyyy HH:mm" }}
+                    }
+                  </td>
+                  <td class="px-5 py-3 text-right whitespace-nowrap">
+                    @if (removingId() === entry.id) {
+                      <fu-spinner [size]="16" />
+                    } @else {
+                      <button
+                        class="text-xs font-medium hover:underline"
+                        style="color: var(--color-danger)"
+                        (click)="removeEntry(entry)"
+                      >
+                        Quitar
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
+
   @if (requests() === undefined) {
     <div class="flex justify-center py-16"><fu-spinner [size]="32" /></div>
   } @else if (requests() === null) {
