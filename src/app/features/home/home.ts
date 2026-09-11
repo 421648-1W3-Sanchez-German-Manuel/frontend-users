@@ -20,7 +20,7 @@ const ACTIONS: QuickAction[] = [
   { icon: '🔑', title: 'Cambiar contraseña', body: 'Actualizá tu contraseña de acceso.', link: '/cambiar-password' },
   { icon: '✉️', title: 'Solicitar whitelist', body: 'Pedí que se habilite un email docente.', link: '/whitelist/solicitar', professorOnly: true },
   { icon: '🧑‍🤝‍🧑', title: 'Usuarios', body: 'Administrá cuentas de la plataforma.', link: '/admin/usuarios', adminOnly: true },
-  { icon: '📋', title: 'Solicitudes whitelist', body: 'Revisá y aprobá pedidos pendientes.', link: '/admin/whitelist', adminOnly: true },
+  { icon: '📋', title: 'Whitelist', body: 'Gestioná emails habilitados y pedidos pendientes.', link: '/admin/whitelist', adminOnly: true },
 ];
 
 const ROLE_LABEL: Record<string, string> = {
