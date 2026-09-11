@@ -1,0 +1,54 @@
+// Shared keyframes and background/motion utility classes.
+
+@keyframes fu-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -14px, 0); }
+}
+
+@keyframes fu-pop-in {
+  from { opacity: 0; transform: translate3d(0, 10px, 0) scale(0.96); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes fu-scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+// Angular inserts each routed component as the next sibling of its
+// <router-outlet> anchor — this animates every page transition globally,
+// without needing the View Transitions API (which aborts noisily whenever
+// a guard redirects synchronously, i.e. constantly in this app).
+router-outlet + * {
+  display: block;
+  animation: fu-pop-in 0.3s ease-out;
+}
+
+.fu-noise-grid {
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--color-border) 35%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-border) 35%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.fu-scanline {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 50%;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--color-cyan) 6%, transparent) 50%,
+    transparent
+  );
+  animation: fu-scanline 9s linear infinite;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fu-scanline,
+  [style*='fu-float'],
+  router-outlet + * {
+    animation: none !important;
+  }
+}

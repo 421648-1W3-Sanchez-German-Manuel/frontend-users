@@ -1,0 +1,65 @@
+<div class="max-w-lg mx-auto">
+  <a routerLink="/admin/usuarios" class="text-sm font-medium hover:underline" style="color: var(--color-cyan)">&larr; Volver a usuarios</a>
+
+  <div class="fu-card !p-8 mt-4 border-l-4" style="border-left-color: var(--color-danger)">
+    @switch (step()) {
+      @case ('done') {
+        <div class="text-center py-4">
+          <div class="text-4xl mb-3">🗑️</div>
+          <p class="text-sm" style="color: var(--color-text-muted)">La cuenta fue eliminada permanentemente.</p>
+          <button fuButton variant="secondary" class="mt-6 w-full" (click)="goToList()">Volver a usuarios</button>
+        </div>
+      }
+      @case ('code') {
+        <h1 class="text-lg mb-2" style="color: var(--color-danger)">Confirmá con tu código</h1>
+        <p class="text-sm mb-6" style="color: var(--color-text-muted)">
+          Te enviamos un código de verificación por email. Ingresalo para eliminar definitivamente a
+          <strong style="color: var(--color-text)">{{ targetName }}</strong>.
+        </p>
+        <fu-otp-input [(value)]="code" />
+
+        @if (errorMessage()) {
+          <div class="rounded-[var(--radius-sm)] px-4 py-3 text-sm mt-4" style="background: color-mix(in srgb, var(--color-danger) 12%, transparent); color: var(--color-danger)">
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <button fuButton variant="danger" size="lg" [loading]="loading()" [disabled]="code().length !== 6" class="w-full mt-6" (click)="confirmDelete()">
+          Eliminar definitivamente
+        </button>
+      }
+      @default {
+        <h1 class="text-lg mb-2" style="color: var(--color-danger)">Eliminar usuario</h1>
+        <p class="text-sm mb-6" style="color: var(--color-text-muted)">
+          Esta acción es irreversible. Vas a tener que confirmar tu contraseña y un código de verificación.
+        </p>
+
+        <form [formGroup]="confirmForm" (ngSubmit)="requestCode()" class="flex flex-col gap-4" novalidate>
+          <div>
+            <label class="fu-label" for="password">Tu contraseña</label>
+            <input id="password" type="password" class="fu-input" formControlName="password" autocomplete="current-password" />
+          </div>
+          <div>
+            <label class="fu-label" for="usernameConfirmation">
+              Escribí el email de la cuenta a eliminar
+              @if (targetEmail) {
+                <span class="font-mono font-semibold" style="color: var(--color-text)"> ({{ targetEmail }})</span>
+              }
+            </label>
+            <input id="usernameConfirmation" class="fu-input" formControlName="usernameConfirmation" autocomplete="off" />
+          </div>
+
+          @if (errorMessage()) {
+            <div class="fu-alert fu-alert--danger">
+              {{ errorMessage() }}
+            </div>
+          }
+
+          <button fuButton variant="danger" size="lg" type="submit" [loading]="loading()" [disabled]="!confirmationMatches" class="w-full mt-2">
+            Enviar código de verificación
+          </button>
+        </form>
+      }
+    }
+  </div>
+</div>

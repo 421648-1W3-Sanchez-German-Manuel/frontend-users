@@ -1,0 +1,123 @@
+<fu-auth-shell title="Creá tu cuenta" subtitle="Elegí tu perfil para empezar" [maxWidth]="520">
+  <div class="flex gap-2 mb-6 p-1 rounded-[var(--radius-md)]" style="background: var(--color-surface-2)">
+    <button
+      type="button"
+      class="flex-1 py-2 rounded-[var(--radius-sm)] text-sm font-semibold transition-all"
+      [style.background]="tab() === 'student' ? 'var(--color-surface)' : 'transparent'"
+      [style.color]="tab() === 'student' ? 'var(--color-text)' : 'var(--color-text-muted)'"
+      [style.box-shadow]="tab() === 'student' ? 'var(--shadow-sm)' : 'none'"
+      (click)="setTab('student')"
+    >
+      Estudiante
+    </button>
+    <button
+      type="button"
+      class="flex-1 py-2 rounded-[var(--radius-sm)] text-sm font-semibold transition-all"
+      [style.background]="tab() === 'professor' ? 'var(--color-surface)' : 'transparent'"
+      [style.color]="tab() === 'professor' ? 'var(--color-text)' : 'var(--color-text-muted)'"
+      [style.box-shadow]="tab() === 'professor' ? 'var(--shadow-sm)' : 'none'"
+      (click)="setTab('professor')"
+    >
+      Profesor
+    </button>
+  </div>
+
+  @if (tab() === 'student') {
+    <form [formGroup]="studentForm" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="fu-label" for="s-firstNames">Nombres</label>
+          <input id="s-firstNames" class="fu-input" formControlName="firstNames" />
+        </div>
+        <div>
+          <label class="fu-label" for="s-lastNames">Apellidos</label>
+          <input id="s-lastNames" class="fu-input" formControlName="lastNames" />
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="fu-label" for="s-legajo">Legajo</label>
+          <input id="s-legajo" class="fu-input" formControlName="legajo" />
+        </div>
+        <div>
+          <label class="fu-label" for="s-invitationCode">Código de invitación</label>
+          <input id="s-invitationCode" class="fu-input" formControlName="invitationCode" />
+        </div>
+      </div>
+      <div>
+        <label class="fu-label" for="s-email">Email</label>
+        <input id="s-email" type="email" class="fu-input" formControlName="email" autocomplete="email" />
+      </div>
+      <div>
+        <label class="fu-label" for="s-password">Contraseña</label>
+        <input id="s-password" type="password" class="fu-input" formControlName="password" autocomplete="new-password" />
+        <fu-password-strength [password]="studentForm.controls.password.value" />
+        <p class="text-xs mt-1" style="color: var(--color-text-faint)">Mínimo 10 caracteres, con mayúscula, minúscula y número.</p>
+      </div>
+      <label class="flex items-start gap-2 text-xs" style="color: var(--color-text-muted)">
+        <input type="checkbox" formControlName="acceptTerms" class="mt-0.5" />
+        <span>
+          Acepto los
+          <a href="#" class="underline" style="color: var(--color-cyan)">Términos y Condiciones</a>
+          @if (terms(); as t) { (versión {{ t.version }}) }
+        </span>
+      </label>
+
+      @if (errorMessage()) {
+        <div class="fu-alert fu-alert--danger">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <button fuButton variant="primary" size="lg" type="submit" [loading]="loading()" class="mt-2 w-full">
+        Crear cuenta de estudiante
+      </button>
+    </form>
+  } @else {
+    <form [formGroup]="professorForm" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="fu-label" for="p-firstNames">Nombres</label>
+          <input id="p-firstNames" class="fu-input" formControlName="firstNames" />
+        </div>
+        <div>
+          <label class="fu-label" for="p-lastNames">Apellidos</label>
+          <input id="p-lastNames" class="fu-input" formControlName="lastNames" />
+        </div>
+      </div>
+      <div>
+        <label class="fu-label" for="p-email">Email institucional</label>
+        <input id="p-email" type="email" class="fu-input" formControlName="email" autocomplete="email" />
+        <p class="text-xs mt-1" style="color: var(--color-text-faint)">Tiene que estar en la lista blanca de docentes.</p>
+      </div>
+      <div>
+        <label class="fu-label" for="p-password">Contraseña</label>
+        <input id="p-password" type="password" class="fu-input" formControlName="password" autocomplete="new-password" />
+        <fu-password-strength [password]="professorForm.controls.password.value" />
+      </div>
+      <label class="flex items-start gap-2 text-xs" style="color: var(--color-text-muted)">
+        <input type="checkbox" formControlName="acceptTerms" class="mt-0.5" />
+        <span>
+          Acepto los
+          <a href="#" class="underline" style="color: var(--color-cyan)">Términos y Condiciones</a>
+          @if (terms(); as t) { (versión {{ t.version }}) }
+        </span>
+      </label>
+
+      @if (errorMessage()) {
+        <div class="fu-alert fu-alert--danger">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <button fuButton variant="primary" size="lg" type="submit" [loading]="loading()" class="mt-2 w-full">
+        Crear cuenta de profesor
+      </button>
+    </form>
+  }
+
+  <p class="text-center text-sm mt-6" style="color: var(--color-text-muted)">
+    ¿Ya tenés cuenta?
+    <a routerLink="/login" class="font-semibold hover:underline" style="color: var(--color-cyan)">Iniciá sesión</a>
+  </p>
+</fu-auth-shell>

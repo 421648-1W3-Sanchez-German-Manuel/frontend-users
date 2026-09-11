@@ -1,1 +1,95 @@
-/* You can add global styles to this file, and also import other style files */
+@import 'tailwindcss';
+@import './styles/tokens';
+@import './styles/motion';
+@import './styles/components';
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@theme {
+  --font-display: 'Press Start 2P', 'JetBrains Mono', monospace;
+  --font-sans: 'VT323', 'JetBrains Mono', monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  // Light-mode defaults — the dark override lives in styles/_tokens.scss
+  // under [data-theme="dark"], redefining these same custom properties.
+  // Kept fully saturated in both themes on purpose: an 8-bit palette reads
+  // as neon regardless of theme, unlike a muted SaaS one.
+  --color-bg: #eef0fa;
+  --color-bg-alt: #e2e5f5;
+  --color-surface: #ffffff;
+  --color-surface-2: #f2f3fb;
+  --color-border: #171225;
+  --color-border-strong: #171225;
+
+  --color-text: #171225;
+  --color-text-muted: #4a4560;
+  --color-text-faint: #7b7695;
+
+  --color-primary: #8b5cf6;
+  --color-primary-strong: #6d28d9;
+  --color-primary-contrast: #ffffff;
+
+  --color-cyan: #0090a3;
+  --color-magenta: #d1187a;
+  --color-gold: #a36a00;
+
+  --color-success: #0e8a5f;
+  --color-danger: #d1264f;
+  --color-warning: #a36a00;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
+html {
+  // VT323 (the body font) needs a bigger base size than a normal sans to
+  // stay legible — bumping the root size scales every rem-based Tailwind
+  // utility (text-sm, text-xs, gaps sized in rem, ...) proportionally,
+  // instead of hand-editing every occurrence across the templates.
+  font-size: 125%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  line-height: 1.6;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  line-height: 1.6;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-primary) 45%, transparent);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-cyan);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-surface-2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-text);
+  border: 2px solid var(--color-surface-2);
+}

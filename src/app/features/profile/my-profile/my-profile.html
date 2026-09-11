@@ -1,0 +1,52 @@
+<div class="max-w-2xl mx-auto">
+  @if (me() === undefined) {
+    <div class="flex justify-center py-20"><fu-spinner [size]="32" /></div>
+  } @else if (me(); as me) {
+    <div class="fu-card !p-8">
+      <div class="flex items-center gap-5 mb-6">
+        <div
+          class="w-20 h-20 flex items-center justify-center text-2xl font-mono font-bold text-white shrink-0"
+          style="background: var(--color-magenta); border: 3px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm)"
+        >
+          {{ me.firstNames.charAt(0) }}{{ me.lastNames.charAt(0) }}
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-lg truncate" style="color: var(--color-text)">{{ me.firstNames }} {{ me.lastNames }}</h1>
+          <p class="text-lg truncate" style="color: var(--color-text-muted)">{{ me.email }}</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2 mb-6">
+        @for (role of me.roles; track role) {
+          <span class="fu-badge fu-badge--primary">{{ roleLabel(role) }}</span>
+        }
+        <span
+          class="fu-badge"
+          [class.fu-badge--success]="me.accountStatus === 'ACTIVE'"
+          [class.fu-badge--warning]="me.accountStatus !== 'ACTIVE'"
+        >
+          {{ me.accountStatus }}
+        </span>
+      </div>
+
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        @if (me.legajo) {
+          <div>
+            <dt style="color: var(--color-text-faint)">Legajo</dt>
+            <dd class="font-medium" style="color: var(--color-text)">{{ me.legajo }}</dd>
+          </div>
+        }
+        <div>
+          <dt style="color: var(--color-text-faint)">GitHub</dt>
+          <dd class="font-medium" style="color: var(--color-text)">{{ me.githubUsername || '—' }}</dd>
+        </div>
+      </dl>
+
+      <a routerLink="/cambiar-password" class="fu-btn fu-btn--secondary mt-8 w-full sm:w-auto">Cambiar contraseña</a>
+    </div>
+  } @else {
+    <div class="fu-card !p-8 text-center" style="color: var(--color-danger)">
+      No pudimos cargar tu perfil. Probá recargar la página.
+    </div>
+  }
+</div>

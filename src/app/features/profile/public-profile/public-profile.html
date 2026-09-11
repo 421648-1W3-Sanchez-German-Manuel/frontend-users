@@ -1,0 +1,37 @@
+<div class="max-w-2xl mx-auto">
+  @if (profile() === undefined) {
+    <div class="flex justify-center py-20"><fu-spinner [size]="32" /></div>
+  } @else if (profile(); as profile) {
+    <div class="fu-card !p-8">
+      <div class="flex items-center gap-5">
+        <div
+          class="w-20 h-20 flex items-center justify-center text-2xl font-mono font-bold text-white shrink-0"
+          style="background: var(--color-cyan); border: 3px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm)"
+        >
+          {{ profile.firstNames.charAt(0) }}{{ profile.lastNames.charAt(0) }}
+        </div>
+        <div class="min-w-0">
+          <h1 class="text-lg truncate" style="color: var(--color-text)">{{ profile.firstNames }} {{ profile.lastNames }}</h1>
+          @if (profile.githubUsername) {
+            <a
+              [href]="'https://github.com/' + profile.githubUsername"
+              target="_blank"
+              rel="noopener"
+              class="text-lg hover:underline"
+              style="color: var(--color-cyan)"
+            >
+              &#64;{{ profile.githubUsername }}
+            </a>
+          }
+        </div>
+      </div>
+      <p class="text-base mt-6" style="color: var(--color-text-faint)">
+        Este es el perfil público: solo se comparten nombre, apellido, GitHub y avatar entre servicios.
+      </p>
+    </div>
+  } @else {
+    <div class="fu-card !p-8 text-center">
+      <p style="color: var(--color-text-muted)">No encontramos este perfil.</p>
+    </div>
+  }
+</div>

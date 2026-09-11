@@ -1,0 +1,67 @@
+<fu-auth-shell title="Bienvenido de nuevo" subtitle="Ingresá tus credenciales para continuar">
+  @if (banner()) {
+    <div class="mb-5 fu-alert fu-alert--warning">
+      {{ banner() }}
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
+    <div>
+      <label class="fu-label" for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        class="fu-input"
+        formControlName="email"
+        autocomplete="email"
+        placeholder="nombre@dominio.edu"
+        [attr.data-invalid]="form.controls.email.invalid && form.controls.email.touched ? 'true' : null"
+      />
+      @if (form.controls.email.invalid && form.controls.email.touched) {
+        <p class="fu-field-error">Ingresá un email válido.</p>
+      }
+    </div>
+
+    <div>
+      <label class="fu-label" for="password">Contraseña</label>
+      <input
+        id="password"
+        type="password"
+        class="fu-input"
+        formControlName="password"
+        autocomplete="current-password"
+        placeholder="••••••••"
+        [attr.data-invalid]="form.controls.password.invalid && form.controls.password.touched ? 'true' : null"
+      />
+      @if (form.controls.password.invalid && form.controls.password.touched) {
+        <p class="fu-field-error">La contraseña es obligatoria.</p>
+      }
+    </div>
+
+    <div class="flex justify-end -mt-1">
+      <a routerLink="/recuperar-password" class="text-xs font-medium hover:underline" style="color: var(--color-cyan)">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="fu-alert fu-alert--danger">
+        {{ errorMessage() }}
+        @if (retryAfter()) {
+          <span class="block mt-1 font-semibold">Reintentá en {{ retryAfter() }}s.</span>
+        }
+      </div>
+    }
+
+    <button fuButton variant="primary" size="lg" type="submit" [loading]="loading()" class="mt-2 w-full">
+      Continuar
+    </button>
+  </form>
+
+  <p class="text-center text-sm mt-6" style="color: var(--color-text-muted)">
+    ¿No tenés cuenta?
+    <a routerLink="/registro" class="font-semibold hover:underline" style="color: var(--color-cyan)">Registrate</a>
+  </p>
+  <p class="text-center text-xs mt-2" style="color: var(--color-text-faint)">
+    ¿No te llegó el mail de activación?
+    <a routerLink="/reenviar-activacion" class="font-medium hover:underline" style="color: var(--color-text-muted)">Reenviar</a>
+  </p>
+</fu-auth-shell>

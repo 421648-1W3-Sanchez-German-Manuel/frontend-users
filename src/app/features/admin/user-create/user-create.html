@@ -1,0 +1,54 @@
+<div class="max-w-lg mx-auto">
+  <a routerLink="/admin/usuarios" class="text-sm font-medium hover:underline" style="color: var(--color-cyan)">&larr; Volver a usuarios</a>
+
+  <div class="fu-card !p-8 mt-4">
+    <h1 class="text-lg mb-6" style="color: var(--color-text)">Nuevo usuario</h1>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="fu-label" for="firstNames">Nombres</label>
+          <input id="firstNames" class="fu-input" formControlName="firstNames" />
+        </div>
+        <div>
+          <label class="fu-label" for="lastNames">Apellidos</label>
+          <input id="lastNames" class="fu-input" formControlName="lastNames" />
+        </div>
+      </div>
+      <div>
+        <label class="fu-label" for="email">Email</label>
+        <input id="email" type="email" class="fu-input" formControlName="email" />
+      </div>
+      <div>
+        <label class="fu-label" for="legajo">Legajo (opcional)</label>
+        <input id="legajo" class="fu-input" formControlName="legajo" />
+      </div>
+
+      <div>
+        <label class="fu-label">Roles</label>
+        <div class="flex gap-2 flex-wrap">
+          @for (role of allRoles; track role) {
+            <button
+              type="button"
+              class="fu-badge"
+              [class.fu-badge--primary]="selectedRoles().includes(role)"
+              (click)="toggleRole(role)"
+            >
+              {{ role }}
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="fu-alert fu-alert--danger">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <button fuButton variant="primary" size="lg" type="submit" [loading]="loading()" class="w-full mt-2">
+        Crear usuario
+      </button>
+    </form>
+  </div>
+</div>

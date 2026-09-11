@@ -1,0 +1,31 @@
+<fu-auth-shell title="Revisá tu email" [subtitle]="'Te enviamos un código de 6 dígitos a ' + email">
+  <fu-otp-input [(value)]="code" [invalid]="shake()" (complete)="submit()" />
+
+  <p class="text-center text-sm mt-5" style="color: var(--color-text-muted)">
+    El código vence en
+    <span class="font-mono font-semibold" style="color: var(--color-cyan)">{{ formattedCountdown }}</span>
+  </p>
+
+  @if (errorMessage()) {
+    <div class="mt-4 fu-alert fu-alert--danger text-center">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <button
+    fuButton
+    variant="primary"
+    size="lg"
+    type="button"
+    class="mt-6 w-full"
+    [loading]="loading()"
+    [disabled]="code().length !== 6 || secondsLeft() === 0"
+    (click)="submit()"
+  >
+    Verificar código
+  </button>
+
+  <button fuButton variant="ghost" type="button" class="mt-2 w-full" (click)="backToLogin()">
+    Volver al inicio de sesión
+  </button>
+</fu-auth-shell>

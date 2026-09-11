@@ -1,0 +1,72 @@
+<div class="max-w-5xl mx-auto">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-lg" style="color: var(--color-text)">Usuarios</h1>
+      <p class="text-sm mt-1" style="color: var(--color-text-muted)">Gestión de cuentas de la plataforma.</p>
+    </div>
+    <a routerLink="/admin/usuarios/nuevo" class="fu-btn fu-btn--primary">+ Nuevo usuario</a>
+  </div>
+
+  <input
+    class="fu-input mb-6 max-w-sm"
+    placeholder="Buscar por nombre o email…"
+    [value]="search()"
+    (input)="search.set($any($event.target).value)"
+  />
+
+  @if (users() === undefined) {
+    <div class="flex justify-center py-16"><fu-spinner [size]="32" /></div>
+  } @else if (users() === null) {
+    <div class="fu-card !p-8 text-center" style="color: var(--color-danger)">
+      No pudimos cargar la lista de usuarios.
+    </div>
+  } @else {
+    <div class="fu-card !p-0 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr style="background: var(--color-surface-2)">
+              <th class="text-left px-5 py-3 font-semibold" style="color: var(--color-text-muted)">Nombre</th>
+              <th class="text-left px-5 py-3 font-semibold" style="color: var(--color-text-muted)">Email</th>
+              <th class="text-left px-5 py-3 font-semibold" style="color: var(--color-text-muted)">Rol</th>
+              <th class="text-left px-5 py-3 font-semibold" style="color: var(--color-text-muted)">Estado</th>
+              <th class="text-right px-5 py-3 font-semibold" style="color: var(--color-text-muted)">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of filtered(); track user.id) {
+              <tr class="border-t" style="border-color: var(--color-border)">
+                <td class="px-5 py-3" style="color: var(--color-text)">{{ user.firstNames }} {{ user.lastNames }}</td>
+                <td class="px-5 py-3" style="color: var(--color-text-muted)">{{ user.email }}</td>
+                <td class="px-5 py-3">
+                  @for (role of user.roles; track role) {
+                    <span class="fu-badge fu-badge--primary mr-1">{{ role }}</span>
+                  }
+                </td>
+                <td class="px-5 py-3">
+                  <span class="fu-badge" [class.fu-badge--success]="user.accountStatus === 'ACTIVE'" [class.fu-badge--warning]="user.accountStatus !== 'ACTIVE'">
+                    {{ user.accountStatus }}
+                  </span>
+                </td>
+                <td class="px-5 py-3 text-right whitespace-nowrap">
+                  <a [routerLink]="['/admin/usuarios', user.id, 'rol']" class="text-xs font-medium hover:underline mr-3" style="color: var(--color-cyan)">Rol</a>
+                  <a
+                    [routerLink]="['/admin/usuarios', user.id, 'eliminar']"
+                    [state]="{ email: user.email, name: user.firstNames + ' ' + user.lastNames }"
+                    class="text-xs font-medium hover:underline"
+                    style="color: var(--color-danger)"
+                    >Eliminar</a
+                  >
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="px-5 py-10 text-center" style="color: var(--color-text-faint)">Sin resultados.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

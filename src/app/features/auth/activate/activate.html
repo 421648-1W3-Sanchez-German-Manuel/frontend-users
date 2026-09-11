@@ -1,0 +1,32 @@
+<fu-auth-shell title="Activar cuenta">
+  @switch (status()) {
+    @case ('success') {
+      <div class="text-center">
+        <div class="text-5xl mb-4">🎉</div>
+        <p class="text-sm" style="color: var(--color-text-muted)">
+          Tu cuenta fue activada. Ya podés iniciar sesión.
+        </p>
+      </div>
+      <button fuButton variant="primary" size="lg" class="mt-6 w-full" (click)="goLogin()">Iniciar sesión</button>
+    }
+    @case ('error') {
+      <div class="text-center">
+        <div class="text-5xl mb-4">⚠️</div>
+        <p class="text-sm" style="color: var(--color-danger)">{{ errorMessage() }}</p>
+      </div>
+      <a routerLink="/reenviar-activacion" class="fu-btn fu-btn--secondary mt-6 w-full">Pedir un nuevo enlace</a>
+    }
+    @default {
+      <div class="text-center">
+        <div class="text-5xl mb-4">📧</div>
+        <p class="text-sm" style="color: var(--color-text-muted)">
+          Presioná el botón para activar tu cuenta. Por seguridad, no la activamos automáticamente al abrir el
+          enlace.
+        </p>
+      </div>
+      <button fuButton variant="primary" size="lg" class="mt-6 w-full" [loading]="status() === 'loading'" (click)="activate()">
+        Activar mi cuenta
+      </button>
+    }
+  }
+</fu-auth-shell>

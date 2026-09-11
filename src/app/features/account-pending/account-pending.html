@@ -1,0 +1,31 @@
+<fu-auth-shell title="Cuenta en validación" subtitle="Ya activaste tu cuenta, pero falta un paso más">
+  <div class="text-center">
+    <div class="text-5xl mb-4" style="animation: fu-float 3s ease-in-out infinite">⏳</div>
+    <p class="text-sm" style="color: var(--color-text-muted)">
+      El sistema de Cursos todavía tiene que validar tu padrón. Esto pasa de forma automática y no hay nada que
+      puedas hacer para acelerarlo — pero podés volver a chequear en cualquier momento.
+    </p>
+  </div>
+
+  @switch (checkState()) {
+    @case ('still-pending') {
+      <div class="mt-5 fu-alert fu-alert--warning text-center">
+        Todavía sigue pendiente. Probá de nuevo más tarde.
+      </div>
+    }
+    @case ('now-active') {
+      <div class="mt-5 fu-alert fu-alert--success text-center">
+        ¡Tu cuenta ya está activa! Iniciá sesión de nuevo para que se actualice.
+      </div>
+    }
+  }
+
+  @if (checkState() === 'now-active') {
+    <button fuButton variant="primary" size="lg" class="mt-6 w-full" (click)="reLogin()">Iniciar sesión de nuevo</button>
+  } @else {
+    <button fuButton variant="secondary" size="lg" class="mt-6 w-full" [loading]="checkState() === 'checking'" (click)="checkStatus()">
+      Verificar estado
+    </button>
+    <button fuButton variant="ghost" class="mt-2 w-full" (click)="reLogin()">Cerrar sesión</button>
+  }
+</fu-auth-shell>

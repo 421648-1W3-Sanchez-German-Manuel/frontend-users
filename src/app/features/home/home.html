@@ -1,0 +1,36 @@
+<div class="max-w-5xl mx-auto">
+  <div class="fu-card !p-8 mb-8 flex flex-col sm:flex-row sm:items-center gap-6">
+    <div
+      class="w-16 h-16 flex items-center justify-center text-2xl shrink-0"
+      style="background: var(--color-primary); border: 3px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm)"
+    >
+      👋
+    </div>
+    <div class="flex-1">
+      @if (me() === undefined) {
+        <fu-spinner [size]="22" />
+      } @else if (me(); as me) {
+        <h1 class="text-lg" style="color: var(--color-text)">Hola, {{ me.firstNames }}</h1>
+        <p class="text-lg mt-1" style="color: var(--color-text-muted)">{{ me.email }}</p>
+      } @else {
+        <h1 class="text-lg" style="color: var(--color-text)">Hola de nuevo</h1>
+      }
+      <div class="flex flex-wrap gap-2 mt-3">
+        @for (role of roleLabels(); track role) {
+          <span class="fu-badge fu-badge--primary">{{ role }}</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <h2 class="text-base mb-4" style="color: var(--color-text)">Acciones rápidas</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    @for (action of actions(); track action.link) {
+      <a [routerLink]="action.link" class="fu-card fu-card--hover !p-6 block">
+        <div class="text-3xl mb-3">{{ action.icon }}</div>
+        <h3 class="text-sm mb-2" style="color: var(--color-text)">{{ action.title }}</h3>
+        <p class="text-lg" style="color: var(--color-text-muted)">{{ action.body }}</p>
+      </a>
+    }
+  </div>
+</div>

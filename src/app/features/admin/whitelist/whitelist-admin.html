@@ -1,0 +1,39 @@
+<div class="max-w-3xl mx-auto">
+  <h1 class="text-lg mb-1" style="color: var(--color-text)">Solicitudes de whitelist</h1>
+  <p class="text-sm mb-6" style="color: var(--color-text-muted)">Revisá y aprobá los pedidos de habilitación de email docente.</p>
+
+  @if (requests() === undefined) {
+    <div class="flex justify-center py-16"><fu-spinner [size]="32" /></div>
+  } @else if (requests() === null) {
+    <div class="fu-card !p-8 text-center" style="color: var(--color-danger)">No pudimos cargar las solicitudes.</div>
+  } @else {
+    <div class="flex flex-col gap-3">
+      @for (request of requests(); track request.id) {
+        <div class="fu-card !p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold truncate" style="color: var(--color-text)">{{ request.email }}</p>
+            @if (request.reason) {
+              <p class="text-sm mt-0.5" style="color: var(--color-text-muted)">{{ request.reason }}</p>
+            }
+            <span
+              class="fu-badge mt-2"
+              [class.fu-badge--success]="request.status === 'APPROVED'"
+              [class.fu-badge--danger]="request.status === 'REJECTED'"
+              [class.fu-badge--warning]="request.status === 'PENDING'"
+            >
+              {{ request.status }}
+            </span>
+          </div>
+          @if (request.status === 'PENDING') {
+            <div class="flex gap-2 shrink-0">
+              <button fuButton variant="secondary" size="sm" [loading]="processingId() === request.id" (click)="review(request, 'REJECTED')">Rechazar</button>
+              <button fuButton variant="primary" size="sm" [loading]="processingId() === request.id" (click)="review(request, 'APPROVED')">Aprobar</button>
+            </div>
+          }
+        </div>
+      } @empty {
+        <div class="fu-card !p-10 text-center" style="color: var(--color-text-faint)">No hay solicitudes.</div>
+      }
+    </div>
+  }
+</div>

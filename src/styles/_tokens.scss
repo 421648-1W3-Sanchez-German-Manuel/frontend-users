@@ -1,0 +1,53 @@
+// Non-Tailwind design tokens (hard "pixel" shadows + radii) + the dark-mode
+// override for every --color-* variable declared in the @theme block in
+// styles.scss. Light values live in @theme (the single source of truth for
+// the defaults); this file only overrides them for [data-theme="dark"].
+//
+// Shadows are solid offset blocks (no blur) on purpose — that's what reads
+// as "8-bit depth" instead of a soft modern drop shadow.
+
+:root {
+  --shadow-sm: 3px 3px 0 var(--color-border);
+  --shadow-md: 5px 5px 0 var(--color-border);
+  --shadow-lg: 8px 8px 0 var(--color-border);
+  --shadow-press: 1px 1px 0 var(--color-border);
+
+  // Square, on purpose — no rounded corners anywhere in this design system.
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --color-bg: #0d0b1e;
+  --color-bg-alt: #151030;
+  --color-surface: #171331;
+  --color-surface-2: #1f1a3d;
+  --color-border: #8b5cf6;
+  --color-border-strong: #00e5ff;
+
+  --color-text: #f1eeff;
+  --color-text-muted: #b7aede;
+  --color-text-faint: #756a9c;
+
+  --color-primary: #a684ff;
+  --color-primary-strong: #8b5cf6;
+  --color-primary-contrast: #0d0b1e;
+
+  --color-cyan: #00e5ff;
+  --color-magenta: #ff2e93;
+  --color-gold: #ffd60a;
+
+  --color-success: #3ddc97;
+  --color-danger: #ff5c7a;
+  --color-warning: #ffd60a;
+
+  --shadow-sm: 3px 3px 0 var(--color-border-strong);
+  --shadow-md: 5px 5px 0 var(--color-border-strong);
+  --shadow-lg: 8px 8px 0 var(--color-border-strong);
+  --shadow-press: 1px 1px 0 var(--color-border-strong);
+
+  color-scheme: dark;
+}

@@ -1,0 +1,187 @@
+// Flat, hard-edged "8-bit" component classes — solid borders, offset block
+// shadows instead of blur, snappy step transitions instead of smooth easing.
+
+.fu-card {
+  @apply rounded-[var(--radius-lg)] p-6 relative;
+  background: var(--color-surface);
+  border: 3px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+}
+
+// Modifier for clickable card tiles — a flat "lift" on hover/press instead
+// of a smooth 3D tilt, in step with the button press language above.
+.fu-card--hover:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: var(--shadow-lg);
+}
+.fu-card--hover:active {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-press);
+}
+
+// Optional retro "window" title bar — three dots + a pixel-font label —
+// echoing the ED-CADE component-library chrome from the reference.
+.fu-window-bar {
+  @apply flex items-center gap-2 -mx-6 -mt-6 mb-6 px-4 py-2.5;
+  border-bottom: 3px solid var(--color-border);
+  background: var(--color-surface-2);
+}
+.fu-window-dot {
+  @apply w-2.5 h-2.5 inline-block;
+  border: 1.5px solid var(--color-border);
+}
+
+.fu-input {
+  @apply w-full px-4 py-2.5 transition-colors duration-100;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  border: 2.5px solid var(--color-border);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+}
+.fu-input::placeholder {
+  color: var(--color-text-faint);
+  opacity: 1;
+}
+.fu-input:focus {
+  outline: none;
+  border-color: var(--color-cyan);
+  box-shadow: var(--shadow-press);
+}
+.fu-input[data-invalid='true'] {
+  border-color: var(--color-danger);
+}
+.fu-input[data-invalid='true']:focus {
+  box-shadow: 3px 3px 0 var(--color-danger);
+}
+
+.fu-label {
+  @apply block text-sm mb-1.5 uppercase;
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.fu-field-error {
+  @apply text-sm mt-1.5 flex items-center gap-1.5;
+  color: var(--color-danger);
+}
+
+.fu-btn {
+  @apply relative inline-flex items-center justify-center gap-2 px-5 py-2.5 select-none uppercase;
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+  border: 2.5px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.08s ease-out, box-shadow 0.08s ease-out, filter 0.08s ease-out;
+  transform: translate(0, 0);
+}
+.fu-btn:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow-md);
+}
+.fu-btn:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-press);
+}
+.fu-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+
+.fu-btn--primary {
+  color: var(--color-primary-contrast);
+  background: var(--color-primary);
+}
+.fu-btn--primary:hover:not(:disabled) {
+  background: var(--color-primary-strong);
+}
+
+.fu-btn--secondary {
+  color: var(--color-text);
+  background: var(--color-surface-2);
+}
+.fu-btn--secondary:hover:not(:disabled) {
+  background: var(--color-surface);
+  color: var(--color-cyan);
+  border-color: var(--color-cyan);
+}
+
+.fu-btn--ghost {
+  color: var(--color-text-muted);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.fu-btn--ghost:hover:not(:disabled) {
+  color: var(--color-text);
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-sm);
+  transform: translate(0, 0);
+}
+
+.fu-btn--danger {
+  color: #fff;
+  background: var(--color-danger);
+}
+.fu-btn--danger:hover:not(:disabled) {
+  background: #a30f38;
+}
+
+.fu-btn--sm {
+  @apply px-3.5 py-1.5;
+  font-size: 0.6rem;
+}
+.fu-btn--lg {
+  @apply px-7 py-3.5;
+  font-size: 0.8rem;
+}
+
+.fu-badge {
+  @apply inline-flex items-center gap-1.5 px-2.5 py-1 text-xs uppercase;
+  font-family: var(--font-display);
+  font-size: 0.55rem;
+  letter-spacing: 0.04em;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  border: 2px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+.fu-badge--success { color: var(--color-success); border-color: var(--color-success); }
+.fu-badge--danger { color: var(--color-danger); border-color: var(--color-danger); }
+.fu-badge--warning { color: var(--color-warning); border-color: var(--color-warning); }
+.fu-badge--primary { color: var(--color-primary); border-color: var(--color-primary); }
+
+.fu-otp-digit {
+  @apply w-12 h-14 text-center text-2xl font-semibold;
+  font-family: var(--font-mono);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-2);
+  border: 2.5px solid var(--color-border);
+  color: var(--color-text);
+  transition: all 0.08s ease-out;
+}
+.fu-otp-digit:focus {
+  outline: none;
+  border-color: var(--color-cyan);
+  box-shadow: var(--shadow-press);
+}
+
+.fu-alert {
+  @apply px-4 py-3 text-base;
+  border-radius: var(--radius-sm);
+  border: 2.5px solid;
+  background: var(--color-surface-2);
+}
+.fu-alert--danger { border-color: var(--color-danger); color: var(--color-danger); }
+.fu-alert--warning { border-color: var(--color-gold); color: var(--color-warning); }
+.fu-alert--success { border-color: var(--color-success); color: var(--color-success); }
+.fu-alert--info { border-color: var(--color-cyan); color: var(--color-cyan); }

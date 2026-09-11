@@ -1,0 +1,36 @@
+<div class="max-w-lg mx-auto">
+  <div class="fu-card !p-8">
+    <h1 class="text-lg mb-1" style="color: var(--color-text)">Solicitar whitelist</h1>
+    <p class="text-sm mb-6" style="color: var(--color-text-muted)">
+      Pedí que se habilite un email para que un profesor pueda registrarse.
+    </p>
+
+    @if (sent()) {
+      <div class="text-center py-6">
+        <div class="text-4xl mb-3">✅</div>
+        <p class="text-sm" style="color: var(--color-text-muted)">
+          Enviamos tu solicitud. Un administrador la va a revisar pronto.
+        </p>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
+        <div>
+          <label class="fu-label" for="email">Email a habilitar</label>
+          <input id="email" type="email" class="fu-input" formControlName="email" />
+        </div>
+        <div>
+          <label class="fu-label" for="reason">Motivo (opcional)</label>
+          <textarea id="reason" class="fu-input" rows="3" formControlName="reason"></textarea>
+        </div>
+
+        @if (errorMessage()) {
+          <div class="fu-alert fu-alert--danger">
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <button fuButton variant="primary" type="submit" [loading]="loading()" class="w-full">Enviar solicitud</button>
+      </form>
+    }
+  </div>
+</div>

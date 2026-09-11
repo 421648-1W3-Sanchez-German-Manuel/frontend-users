@@ -1,0 +1,31 @@
+<div class="max-w-lg mx-auto">
+  <a routerLink="/admin/usuarios" class="text-sm font-medium hover:underline" style="color: var(--color-cyan)">&larr; Volver a usuarios</a>
+
+  <div class="fu-card !p-8 mt-4">
+    <h1 class="text-lg mb-2" style="color: var(--color-text)">Cambiar rol</h1>
+    <p class="text-sm mb-6" style="color: var(--color-text-muted)">Elegí el nuevo conjunto de roles para este usuario.</p>
+
+    <div class="flex gap-2 flex-wrap mb-6">
+      @for (role of allRoles; track role) {
+        <button
+          type="button"
+          class="fu-badge"
+          [class.fu-badge--primary]="selectedRoles().includes(role)"
+          (click)="toggleRole(role)"
+        >
+          {{ role }}
+        </button>
+      }
+    </div>
+
+    @if (errorMessage()) {
+      <div class="fu-alert fu-alert--danger mb-4">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <button fuButton variant="primary" size="lg" [loading]="loading()" [disabled]="selectedRoles().length === 0" class="w-full" (click)="submit()">
+      Guardar rol
+    </button>
+  </div>
+</div>

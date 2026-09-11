@@ -1,0 +1,49 @@
+<fu-auth-shell title="¡Bienvenido!" subtitle="Un par de pasos antes de arrancar" [maxWidth]="520">
+  @if (!tourDone()) {
+    <div class="flex justify-center gap-2 mb-6">
+      @for (s of steps; track $index) {
+        <span
+          class="h-2.5 transition-all duration-150"
+          style="border-radius: var(--radius-sm)"
+          [style.width.px]="$index === stepIndex() ? 26 : 10"
+          [style.background]="$index <= stepIndex() ? 'var(--color-primary)' : 'var(--color-surface-2)'"
+          [style.border]="'2px solid var(--color-border)'"
+        ></span>
+      }
+    </div>
+
+    <div class="text-center py-4" style="animation: fu-pop-in .25s ease-out" [attr.data-step]="stepIndex()">
+      <div class="text-6xl mb-5" style="animation: fu-float 3s ease-in-out infinite">{{ steps[stepIndex()].icon }}</div>
+      <h2 class="text-lg mb-3" style="color: var(--color-text)">{{ steps[stepIndex()].title }}</h2>
+      <p class="text-lg max-w-xs mx-auto" style="color: var(--color-text-muted)">{{ steps[stepIndex()].body }}</p>
+    </div>
+
+    <button fuButton variant="primary" size="lg" class="mt-6 w-full" (click)="next()">
+      {{ stepIndex() === steps.length - 1 ? 'Continuar' : 'Siguiente' }}
+    </button>
+  } @else {
+    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
+      <div>
+        <label class="fu-label" for="githubUsername">Usuario de GitHub</label>
+        <input id="githubUsername" class="fu-input" formControlName="githubUsername" placeholder="octocat" />
+        @if (form.controls.githubUsername.invalid && form.controls.githubUsername.touched) {
+          <p class="fu-field-error">Ingresá tu usuario de GitHub.</p>
+        }
+      </div>
+      <div>
+        <label class="fu-label" for="avatarRef">Avatar (opcional)</label>
+        <input id="avatarRef" class="fu-input" formControlName="avatarRef" placeholder="URL de una imagen" />
+      </div>
+
+      @if (errorMessage()) {
+        <div class="fu-alert fu-alert--danger">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <button fuButton variant="primary" size="lg" type="submit" [loading]="loading()" class="w-full mt-2">
+        Terminar y volver a iniciar sesión
+      </button>
+    </form>
+  }
+</fu-auth-shell>
