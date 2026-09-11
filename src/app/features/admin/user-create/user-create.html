@@ -2,7 +2,12 @@
   <a routerLink="/admin/usuarios" class="text-sm font-medium hover:underline" style="color: var(--color-cyan)">&larr; Volver a usuarios</a>
 
   <div class="fu-card !p-8 mt-4">
-    <h1 class="text-lg mb-6" style="color: var(--color-text)">Nuevo usuario</h1>
+    <h1 class="text-lg mb-1" style="color: var(--color-text)">Nuevo administrador</h1>
+    <p class="text-sm mb-6" style="color: var(--color-text-muted)">
+      Este alta es solo para cuentas ADMIN. Profesores y alumnos se dan de alta solos: al
+      profesor agregalo a la <a routerLink="/admin/whitelist" class="hover:underline" style="color: var(--color-cyan)">whitelist</a>
+      y el resto lo completa él mismo en su primer inicio de sesión.
+    </p>
 
     <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -20,24 +25,8 @@
         <input id="email" type="email" class="fu-input" formControlName="email" />
       </div>
       <div>
-        <label class="fu-label" for="legajo">Legajo (opcional)</label>
-        <input id="legajo" class="fu-input" formControlName="legajo" />
-      </div>
-
-      <div>
-        <label class="fu-label">Roles</label>
-        <div class="flex gap-2 flex-wrap">
-          @for (role of allRoles; track role) {
-            <button
-              type="button"
-              class="fu-badge"
-              [class.fu-badge--primary]="selectedRoles().includes(role)"
-              (click)="toggleRole(role)"
-            >
-              {{ role }}
-            </button>
-          }
-        </div>
+        <label class="fu-label" for="password">Contraseña inicial</label>
+        <input id="password" type="password" class="fu-input" formControlName="password" />
       </div>
 
       @if (errorMessage()) {
@@ -47,7 +36,7 @@
       }
 
       <button fuButton variant="primary" size="lg" type="submit" [loading]="loading()" class="w-full mt-2">
-        Crear usuario
+        Crear administrador
       </button>
     </form>
   </div>
