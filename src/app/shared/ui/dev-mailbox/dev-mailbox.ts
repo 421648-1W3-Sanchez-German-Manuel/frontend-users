@@ -72,6 +72,32 @@ const REFRESCO_MS = 5000;
               </button>
             </header>
 
+            @if (pendientes().length) {
+              <div class="px-3 py-2 shrink-0" style="border-bottom: 1px solid var(--color-border)">
+                <p class="text-xs mb-1.5" style="color: var(--color-text-muted)">
+                  Esperando el padrón de Cursos
+                </p>
+                @for (p of pendientes(); track p.id) {
+                  <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs truncate flex-1" style="color: var(--color-text)">{{ p.email }}</span>
+                    <button
+                      type="button"
+                      class="fu-btn fu-btn--sm fu-btn--secondary shrink-0"
+                      [disabled]="resolviendo() === p.email"
+                      (click)="resolverPadron(p.email)"
+                    >
+                      {{ resolviendo() === p.email ? '...' : 'resolver padrón' }}
+                    </button>
+                  </div>
+                }
+                @if (avisoPadron()) {
+                  <p class="text-xs mt-1" [style.color]="avisoOk() ? 'var(--color-success)' : 'var(--color-danger)'">
+                    {{ avisoPadron() }}
+                  </p>
+                }
+              </div>
+            }
+
             <div class="px-3 py-2 shrink-0" style="border-bottom: 1px solid var(--color-border)">
               <input
                 class="fu-input !py-1 text-xs"
@@ -152,6 +178,10 @@ export class DevMailbox implements OnDestroy {
   protected readonly filtro = signal('');
   protected readonly error = signal<string | null>(null);
   protected readonly copiado = signal<string | null>(null);
+  protected readonly pendientes = signal<{ id: string; email: string }[]>([]);
+  protected readonly resolviendo = signal<string | null>(null);
+  protected readonly avisoPadron = signal<string | null>(null);
+  protected readonly avisoOk = signal(false);
 
   protected readonly visibles = computed(() => {
     const f = this.filtro().trim().toLowerCase();
@@ -189,6 +219,40 @@ export class DevMailbox implements OnDestroy {
     }
   }
 
+  /**
+   * Se hace pasar por Cursos y publica el evento de padron resuelto.
+   *
+   * Un alumno que activa su email queda en PENDING_COURSE esperando que Cursos
+   * valide su padron, y esa validacion llega por Kafka: no hay endpoint HTTP
+   * que la dispare. Como el equipo de Cursos todavia no existe, sin esto la
+   * cuenta se queda esperando para siempre y no se puede probar nada de lo que
+   * viene despues.
+   */
+  protected async resolverPadron(email: string): Promise<void> {
+    this.resolviendo.set(email);
+    this.avisoPadron.set(null);
+    try {
+      const res = await fetch('/dev/resolver-padron', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const cuerpo = await res.json();
+      this.avisoOk.set(res.ok);
+      this.avisoPadron.set(
+        res.ok
+          ? `${email} quedó ${cuerpo.a}. Volvé a loguearte: el token viejo sigue diciendo PENDING_COURSE.`
+          : (cuerpo.error ?? 'No se pudo resolver.'),
+      );
+      await this.cargar(false);
+    } catch {
+      this.avisoOk.set(false);
+      this.avisoPadron.set('El buzón no responde.');
+    } finally {
+      this.resolviendo.set(null);
+    }
+  }
+
   protected hora(fecha: string): string {
     const d = new Date(fecha);
     return Number.isNaN(d.getTime()) ? '' : d.toLocaleTimeString('es-AR', { hour12: false });
@@ -213,6 +277,16 @@ export class DevMailbox implements OnDestroy {
 
       this.mails.set(await res.json());
       this.error.set(null);
+
+      // Las cuentas trabadas van en el mismo refresco: si el buzon anda, esto
+      // anda. Un fallo aca no puede tirar abajo la lista de mails, que es lo
+      // que uno vino a ver.
+      try {
+        const p = await fetch('/dev/pendientes', { headers: { Accept: 'application/json' } });
+        if (p.ok) this.pendientes.set(await p.json());
+      } catch {
+        /* el buzon sin /dev/pendientes sigue sirviendo para ver mails */
+      }
 
       if (primera) {
         this.disponible.set(true);
