@@ -89,8 +89,7 @@ export interface OnboardingRequest {
 
 export interface TermsOfService {
   version: string;
-  content?: string;
-  publishedAt?: string;
+  texto?: string;
 }
 
 export interface MeResponse {

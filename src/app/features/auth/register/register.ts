@@ -33,6 +33,7 @@ export class Register {
   protected readonly tab = signal<Tab>('student');
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly showTerms = signal(false);
 
   protected readonly terms = toSignal(this.authService.terms().pipe(catchError(() => of(null))), {
     initialValue: null,

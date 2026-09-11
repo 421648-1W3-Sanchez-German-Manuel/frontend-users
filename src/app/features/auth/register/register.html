@@ -110,10 +110,25 @@
         <input type="checkbox" formControlName="acceptTerms" class="mt-0.5" />
         <span>
           Acepto los
-          <a href="#" class="underline" style="color: var(--color-cyan)">Términos y Condiciones</a>
+          <a
+            href="javascript:void(0)"
+            class="underline"
+            style="color: var(--color-cyan)"
+            (click)="showTerms.set(!showTerms())"
+            >Términos y Condiciones</a
+          >
           @if (terms(); as t) { (versión {{ t.version }}) }
         </span>
       </label>
+      @if (showTerms()) {
+        <div class="fu-card !p-4 text-xs mt-2 max-h-48 overflow-y-auto" style="color: var(--color-text-muted)">
+          @if (terms(); as t) {
+            <p class="whitespace-pre-line">{{ t.texto }}</p>
+          } @else {
+            No pudimos cargar los términos. Recargá la página.
+          }
+        </div>
+      }
       @if (studentForm.controls.acceptTerms.invalid && studentForm.controls.acceptTerms.touched) {
         <p class="fu-field-error">Tenés que aceptar los términos y condiciones.</p>
       }
@@ -191,10 +206,25 @@
         <input type="checkbox" formControlName="acceptTerms" class="mt-0.5" />
         <span>
           Acepto los
-          <a href="#" class="underline" style="color: var(--color-cyan)">Términos y Condiciones</a>
+          <a
+            href="javascript:void(0)"
+            class="underline"
+            style="color: var(--color-cyan)"
+            (click)="showTerms.set(!showTerms())"
+            >Términos y Condiciones</a
+          >
           @if (terms(); as t) { (versión {{ t.version }}) }
         </span>
       </label>
+      @if (showTerms()) {
+        <div class="fu-card !p-4 text-xs mt-2 max-h-48 overflow-y-auto" style="color: var(--color-text-muted)">
+          @if (terms(); as t) {
+            <p class="whitespace-pre-line">{{ t.texto }}</p>
+          } @else {
+            No pudimos cargar los términos. Recargá la página.
+          }
+        </div>
+      }
       @if (professorForm.controls.acceptTerms.invalid && professorForm.controls.acceptTerms.touched) {
         <p class="fu-field-error">Tenés que aceptar los términos y condiciones.</p>
       }
