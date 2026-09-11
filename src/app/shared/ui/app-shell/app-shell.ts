@@ -101,9 +101,11 @@ import { ToastService } from '../../../core/services/toast.service';
         <nav class="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-1">
           <a routerLink="/home" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)">Inicio</a>
           <a routerLink="/perfil" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)">Mi perfil</a>
-          <a routerLink="/whitelist/solicitar" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)"
-            >Solicitar whitelist</a
-          >
+          @if (isProfessor()) {
+            <a routerLink="/whitelist/solicitar" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)"
+              >Solicitar whitelist</a
+            >
+          }
           @if (isAdmin()) {
             <p class="fu-nav-section">Administración</p>
             <a routerLink="/admin/usuarios" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)">Usuarios</a>
@@ -167,6 +169,7 @@ export class AppShell {
 
   protected readonly sidebarOpen = signal(false);
   protected readonly isAdmin = computed(() => this.tokenStore.isAdmin());
+  protected readonly isProfessor = computed(() => this.tokenStore.roles().includes('PROFESSOR'));
   protected readonly me = toSignal(this.authService.me().pipe(catchError(() => of(null))), { initialValue: null });
   protected readonly initials = computed(() => {
     const me = this.me();

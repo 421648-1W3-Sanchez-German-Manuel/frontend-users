@@ -12,12 +12,13 @@ interface QuickAction {
   body: string;
   link: string;
   adminOnly?: boolean;
+  professorOnly?: boolean;
 }
 
 const ACTIONS: QuickAction[] = [
   { icon: '👤', title: 'Mi perfil', body: 'Ver y compartir tu perfil público.', link: '/perfil' },
   { icon: '🔑', title: 'Cambiar contraseña', body: 'Actualizá tu contraseña de acceso.', link: '/cambiar-password' },
-  { icon: '✉️', title: 'Solicitar whitelist', body: 'Pedí que se habilite un email docente.', link: '/whitelist/solicitar' },
+  { icon: '✉️', title: 'Solicitar whitelist', body: 'Pedí que se habilite un email docente.', link: '/whitelist/solicitar', professorOnly: true },
   { icon: '🧑‍🤝‍🧑', title: 'Usuarios', body: 'Administrá cuentas de la plataforma.', link: '/admin/usuarios', adminOnly: true },
   { icon: '📋', title: 'Solicitudes whitelist', body: 'Revisá y aprobá pedidos pendientes.', link: '/admin/whitelist', adminOnly: true },
 ];
@@ -41,6 +42,9 @@ export class Home {
 
   protected readonly me = toSignal(this.authService.me().pipe(catchError(() => of(null))), { initialValue: undefined });
   protected readonly isAdmin = computed(() => this.tokenStore.isAdmin());
-  protected readonly actions = computed(() => ACTIONS.filter((a) => !a.adminOnly || this.isAdmin()));
+  protected readonly isProfessor = computed(() => this.tokenStore.roles().includes('PROFESSOR'));
+  protected readonly actions = computed(() =>
+    ACTIONS.filter((a) => !a.adminOnly || this.isAdmin()).filter((a) => !a.professorOnly || this.isProfessor())
+  );
   protected readonly roleLabels = computed(() => this.tokenStore.roles().map((r) => ROLE_LABEL[r] ?? r));
 }

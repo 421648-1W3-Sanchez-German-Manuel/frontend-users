@@ -98,6 +98,7 @@ export const routes: Routes = [
       },
       {
         path: 'whitelist/solicitar',
+        canActivate: [roleGuard(['PROFESSOR'])],
         loadComponent: () =>
           import('./features/whitelist-request/whitelist-request').then((m) => m.WhitelistRequestPage),
       },

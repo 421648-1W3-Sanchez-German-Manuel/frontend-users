@@ -62,10 +62,17 @@ export class Onboarding {
     this.authService.patchOnboarding({ githubUsername, avatarRef: avatarRef || null, tourOk: true }).subscribe({
       next: () => {
         this.loading.set(false);
-        // 200 here does NOT refresh the claims already in memory — the
-        // token still says onb:true until the next login (handoff §6).
-        this.authService.clearLocalSession();
-        this.router.navigate(['/login'], { queryParams: { motivo: 'onboarded' } });
+        // 200 here does NOT refresh the claims already in memory — the token
+        // still says onb:true. But a refresh re-reads the user row (firstLogin
+        // is now false) and emits fresh claims, so the person goes on without a
+        // second login. If the refresh fails, fall back to the old behavior.
+        this.authService.refresh().subscribe({
+          next: () => this.router.navigateByUrl('/home'),
+          error: () => {
+            this.authService.clearLocalSession();
+            this.router.navigate(['/login'], { queryParams: { motivo: 'onboarded' } });
+          },
+        });
       },
       error: (error: unknown) => {
         this.loading.set(false);
