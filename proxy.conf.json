@@ -1,0 +1,13 @@
+{
+  "//": "Para `ng serve` en :4200. API_BASE es relativo, asi que sin esto las llamadas irian al dev-server, que no tiene API. Apunta al proxy reverso del stack (tpi-compose), no al gateway: el gateway no publica puerto.",
+  "/api": {
+    "target": "http://localhost:3000",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/.well-known": {
+    "target": "http://localhost:3000",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

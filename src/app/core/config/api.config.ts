@@ -1,5 +1,23 @@
-/** The one true door: everything goes through the API Gateway, nothing else is reachable. */
-export const API_BASE = 'http://localhost:8080';
+/**
+ * The one true door: everything goes through the API Gateway, nothing else is
+ * reachable.
+ *
+ * Empty on purpose — every URL below is RELATIVE, so the browser sends it to
+ * whatever origin served the app. That origin is the reverse proxy (`:3000`),
+ * which forwards `/api/**` to the Gateway. Three consequences:
+ *
+ *   1. No CORS, ever. Same origin means no preflight, in dev and in prod alike.
+ *   2. No per-environment build. The same bundle works behind any host name.
+ *   3. The Gateway stops publishing a port, so nothing can bypass the proxy.
+ *
+ * An absolute `http://localhost:8080` here used to be the value, and it stopped
+ * working the day the Gateway went behind the proxy: 8080 is not published any
+ * more and the browser gets a connection refused.
+ *
+ * For `ng serve` on :4200, `proxy.conf.json` forwards `/api` and `/.well-known`
+ * to `:3000` so relative URLs keep working without a separate build.
+ */
+export const API_BASE = '';
 
 export const API = {
   login: `${API_BASE}/api/users/public/auth/login`,

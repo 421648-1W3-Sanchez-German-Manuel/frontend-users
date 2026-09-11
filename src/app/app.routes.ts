@@ -32,6 +32,20 @@ export const routes: Routes = [
     path: 'activar',
     loadComponent: () => import('./features/auth/activate/activate').then((m) => m.Activate),
   },
+  /**
+   * El path que manda el backend en el mail, en ingles.
+   *
+   * `RegistrationService` arma `{FRONT_URL}/activate?token=...` (y el HANDOFF lo
+   * documenta asi), pero la ruta de esta app esta en castellano. Sin este alias
+   * el enlace de activacion cae en el 404 del router y el flujo 2 no existe.
+   * El mismo componente en los dos paths, no un redirect: un redirect deja la
+   * conservacion del `?token=` a merced del router, y ese token es de un solo
+   * uso — si se pierde, la persona se queda sin cuenta.
+   */
+  {
+    path: 'activate',
+    loadComponent: () => import('./features/auth/activate/activate').then((m) => m.Activate),
+  },
   {
     path: 'reenviar-activacion',
     canActivate: [guestGuard],
@@ -44,6 +58,12 @@ export const routes: Routes = [
   },
   {
     path: 'restablecer-password',
+    loadComponent: () => import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
+  },
+  /** Idem: `PasswordService` manda `{FRONT_URL}/reset?token=...`. Enlace de un
+   *  solo uso y 15 minutos de vida, asi que un 404 acá no se puede reintentar. */
+  {
+    path: 'reset',
     loadComponent: () => import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
   },
 

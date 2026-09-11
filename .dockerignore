@@ -1,0 +1,13 @@
+# Lo que NO tiene que entrar al contexto del build.
+#
+# node_modules es el que importa: mandarlo al daemon son cientos de MB por
+# build, y encima son los binarios del host — el `npm ci` del Dockerfile los
+# reinstala para la plataforma de la imagen igual.
+node_modules
+dist
+.angular
+.git
+.gitignore
+.vscode
+.claude
+*.md
