@@ -27,32 +27,84 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="fu-label" for="s-firstNames">Nombres</label>
-          <input id="s-firstNames" class="fu-input" formControlName="firstNames" />
+          <input
+            id="s-firstNames"
+            class="fu-input"
+            formControlName="firstNames"
+            [attr.data-invalid]="studentForm.controls.firstNames.invalid && studentForm.controls.firstNames.touched ? 'true' : null"
+          />
+          @if (studentForm.controls.firstNames.invalid && studentForm.controls.firstNames.touched) {
+            <p class="fu-field-error">Ingresá tu nombre.</p>
+          }
         </div>
         <div>
           <label class="fu-label" for="s-lastNames">Apellidos</label>
-          <input id="s-lastNames" class="fu-input" formControlName="lastNames" />
+          <input
+            id="s-lastNames"
+            class="fu-input"
+            formControlName="lastNames"
+            [attr.data-invalid]="studentForm.controls.lastNames.invalid && studentForm.controls.lastNames.touched ? 'true' : null"
+          />
+          @if (studentForm.controls.lastNames.invalid && studentForm.controls.lastNames.touched) {
+            <p class="fu-field-error">Ingresá tu apellido.</p>
+          }
         </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="fu-label" for="s-legajo">Legajo</label>
-          <input id="s-legajo" class="fu-input" formControlName="legajo" />
+          <input
+            id="s-legajo"
+            class="fu-input"
+            formControlName="legajo"
+            [attr.data-invalid]="studentForm.controls.legajo.invalid && studentForm.controls.legajo.touched ? 'true' : null"
+          />
+          @if (studentForm.controls.legajo.invalid && studentForm.controls.legajo.touched) {
+            <p class="fu-field-error">Ingresá tu legajo.</p>
+          }
         </div>
         <div>
           <label class="fu-label" for="s-invitationCode">Código de invitación</label>
-          <input id="s-invitationCode" class="fu-input" formControlName="invitationCode" />
+          <input
+            id="s-invitationCode"
+            class="fu-input"
+            formControlName="invitationCode"
+            [attr.data-invalid]="studentForm.controls.invitationCode.invalid && studentForm.controls.invitationCode.touched ? 'true' : null"
+          />
+          @if (studentForm.controls.invitationCode.invalid && studentForm.controls.invitationCode.touched) {
+            <p class="fu-field-error">Ingresá el código de invitación que te pasaron.</p>
+          }
         </div>
       </div>
       <div>
         <label class="fu-label" for="s-email">Email</label>
-        <input id="s-email" type="email" class="fu-input" formControlName="email" autocomplete="email" />
+        <input
+          id="s-email"
+          type="email"
+          class="fu-input"
+          formControlName="email"
+          autocomplete="email"
+          [attr.data-invalid]="studentForm.controls.email.invalid && studentForm.controls.email.touched ? 'true' : null"
+        />
+        @if (studentForm.controls.email.invalid && studentForm.controls.email.touched) {
+          <p class="fu-field-error">Ingresá un email válido.</p>
+        }
       </div>
       <div>
         <label class="fu-label" for="s-password">Contraseña</label>
-        <input id="s-password" type="password" class="fu-input" formControlName="password" autocomplete="new-password" />
+        <input
+          id="s-password"
+          type="password"
+          class="fu-input"
+          formControlName="password"
+          autocomplete="new-password"
+          [attr.data-invalid]="studentForm.controls.password.invalid && studentForm.controls.password.touched ? 'true' : null"
+        />
         <fu-password-strength [password]="studentForm.controls.password.value" />
-        <p class="text-xs mt-1" style="color: var(--color-text-faint)">Mínimo 10 caracteres, con mayúscula, minúscula y número.</p>
+        <p class="text-xs mt-1" style="color: var(--color-text-faint)">Mínimo 12 caracteres, con mayúscula, minúscula y número.</p>
+        @if (studentForm.controls.password.invalid && studentForm.controls.password.touched) {
+          <p class="fu-field-error">La contraseña no cumple los requisitos de arriba.</p>
+        }
       </div>
       <label class="flex items-start gap-2 text-xs" style="color: var(--color-text-muted)">
         <input type="checkbox" formControlName="acceptTerms" class="mt-0.5" />
@@ -62,6 +114,9 @@
           @if (terms(); as t) { (versión {{ t.version }}) }
         </span>
       </label>
+      @if (studentForm.controls.acceptTerms.invalid && studentForm.controls.acceptTerms.touched) {
+        <p class="fu-field-error">Tenés que aceptar los términos y condiciones.</p>
+      }
 
       @if (errorMessage()) {
         <div class="fu-alert fu-alert--danger">
@@ -78,22 +133,59 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label class="fu-label" for="p-firstNames">Nombres</label>
-          <input id="p-firstNames" class="fu-input" formControlName="firstNames" />
+          <input
+            id="p-firstNames"
+            class="fu-input"
+            formControlName="firstNames"
+            [attr.data-invalid]="professorForm.controls.firstNames.invalid && professorForm.controls.firstNames.touched ? 'true' : null"
+          />
+          @if (professorForm.controls.firstNames.invalid && professorForm.controls.firstNames.touched) {
+            <p class="fu-field-error">Ingresá tu nombre.</p>
+          }
         </div>
         <div>
           <label class="fu-label" for="p-lastNames">Apellidos</label>
-          <input id="p-lastNames" class="fu-input" formControlName="lastNames" />
+          <input
+            id="p-lastNames"
+            class="fu-input"
+            formControlName="lastNames"
+            [attr.data-invalid]="professorForm.controls.lastNames.invalid && professorForm.controls.lastNames.touched ? 'true' : null"
+          />
+          @if (professorForm.controls.lastNames.invalid && professorForm.controls.lastNames.touched) {
+            <p class="fu-field-error">Ingresá tu apellido.</p>
+          }
         </div>
       </div>
       <div>
         <label class="fu-label" for="p-email">Email institucional</label>
-        <input id="p-email" type="email" class="fu-input" formControlName="email" autocomplete="email" />
+        <input
+          id="p-email"
+          type="email"
+          class="fu-input"
+          formControlName="email"
+          autocomplete="email"
+          [attr.data-invalid]="professorForm.controls.email.invalid && professorForm.controls.email.touched ? 'true' : null"
+        />
         <p class="text-xs mt-1" style="color: var(--color-text-faint)">Tiene que estar en la lista blanca de docentes.</p>
+        @if (professorForm.controls.email.invalid && professorForm.controls.email.touched) {
+          <p class="fu-field-error">Ingresá un email válido.</p>
+        }
       </div>
       <div>
         <label class="fu-label" for="p-password">Contraseña</label>
-        <input id="p-password" type="password" class="fu-input" formControlName="password" autocomplete="new-password" />
+        <input
+          id="p-password"
+          type="password"
+          class="fu-input"
+          formControlName="password"
+          autocomplete="new-password"
+          [attr.data-invalid]="professorForm.controls.password.invalid && professorForm.controls.password.touched ? 'true' : null"
+        />
         <fu-password-strength [password]="professorForm.controls.password.value" />
+        <p class="text-xs mt-1" style="color: var(--color-text-faint)">Mínimo 12 caracteres, con mayúscula, minúscula y número.</p>
+        @if (professorForm.controls.password.invalid && professorForm.controls.password.touched) {
+          <p class="fu-field-error">La contraseña no cumple los requisitos de arriba.</p>
+        }
       </div>
       <label class="flex items-start gap-2 text-xs" style="color: var(--color-text-muted)">
         <input type="checkbox" formControlName="acceptTerms" class="mt-0.5" />
@@ -103,6 +195,9 @@
           @if (terms(); as t) { (versión {{ t.version }}) }
         </span>
       </label>
+      @if (professorForm.controls.acceptTerms.invalid && professorForm.controls.acceptTerms.touched) {
+        <p class="fu-field-error">Tenés que aceptar los términos y condiciones.</p>
+      }
 
       @if (errorMessage()) {
         <div class="fu-alert fu-alert--danger">

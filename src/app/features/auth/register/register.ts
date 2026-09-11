@@ -11,9 +11,10 @@ import { ApiError } from '../../../core/models/problem-details.model';
 
 type Tab = 'student' | 'professor';
 
+/** Mirrors PasswordPolicy.MIN_CHARACTERS in users-service — keep both in sync. */
 const PASSWORD_VALIDATORS = [
   Validators.required,
-  Validators.minLength(10),
+  Validators.minLength(12),
   Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/),
 ];
 
