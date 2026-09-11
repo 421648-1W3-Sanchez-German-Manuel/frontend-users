@@ -1,11 +1,11 @@
 import { AccountStatus, Role } from './auth.model';
 
+/** RF-ROL-03 - este alta manual crea solo ADMIN; matches backend `CreateUserRequest`. */
 export interface CreateUserRequest {
   firstNames: string;
   lastNames: string;
   email: string;
-  roles: Role[];
-  legajo?: string;
+  password: string;
 }
 
 export interface AdminUser {
