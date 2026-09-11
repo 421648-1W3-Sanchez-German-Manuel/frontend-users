@@ -49,6 +49,14 @@ export class TokenStoreService {
   readonly onboardingPending = computed(() => this._claims()?.onb ?? false);
   readonly userId = computed(() => this._claims()?.sub ?? null);
 
+  /** Merge partial claims into the in-memory token without a network round-trip. */
+  patchClaims(partial: Partial<AccessTokenClaims>): void {
+    const current = this._claims();
+    if (current) {
+      this._claims.set({ ...current, ...partial });
+    }
+  }
+
   constructor() {
     window.addEventListener('storage', (event) => {
       if (event.key === ACCESS_KEY || event.key === REFRESH_KEY) {

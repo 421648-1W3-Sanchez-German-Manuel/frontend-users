@@ -120,6 +120,11 @@ export class AuthService {
     return this.http.patch<void>(API.onboarding, body);
   }
 
+  /** Patch in-memory claims after onboarding completes (no network call). */
+  patchOnboardingClaims(): void {
+    this.tokenStore.patchClaims({ onb: false });
+  }
+
   me(): Observable<MeResponse> {
     return this.http.get<MeResponse>(API.me);
   }

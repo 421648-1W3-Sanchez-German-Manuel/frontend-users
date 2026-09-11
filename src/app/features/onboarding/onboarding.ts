@@ -62,15 +62,20 @@ export class Onboarding {
     this.authService.patchOnboarding({ githubUsername, avatarRef: avatarRef || null, tourOk: true }).subscribe({
       next: () => {
         this.loading.set(false);
-        // 200 here does NOT refresh the claims already in memory — the token
-        // still says onb:true. But a refresh re-reads the user row (firstLogin
-        // is now false) and emits fresh claims, so the person goes on without a
-        // second login. If the refresh fails, fall back to the old behavior.
+        // The PATCH succeeded — the backend row is updated. But the access
+        // token in memory still carries onb:true. We need a refresh to get a
+        // fresh JWT with onb:false so the backend gates pass on subsequent
+        // calls. The token-store is patched as a safety net in case the
+        // refresh has a brief delay, but the refresh is what unblocks the API.
+        this.authService.patchOnboardingClaims();
         this.authService.refresh().subscribe({
           next: () => this.router.navigateByUrl('/home'),
           error: () => {
-            this.authService.clearLocalSession();
-            this.router.navigate(['/login'], { queryParams: { motivo: 'onboarded' } });
+            // Even if the refresh failed, patchOnboardingClaims() already
+            // set onb:false in memory so the gatesGuard passes. Try the
+            // home route; if the backend still rejects, the interceptor
+            // will handle it.
+            this.router.navigateByUrl('/home');
           },
         });
       },
