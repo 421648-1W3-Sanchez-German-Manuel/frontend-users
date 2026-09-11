@@ -37,6 +37,7 @@ export interface WhitelistRequest {
   requestedBy?: string;
   status: WhitelistRequestStatus;
   reason?: string;
+  rejectionReason?: string;
   createdAt?: string;
   reviewedAt?: string;
 }
@@ -46,7 +47,8 @@ export interface CreateWhitelistRequest {
   reason?: string;
 }
 
+/** Matches the backend `ResolveWhitelistRequest` record. */
 export interface ReviewWhitelistRequest {
-  status: 'APPROVED' | 'REJECTED';
-  comment?: string;
+  approve: boolean;
+  rejectionReason?: string;
 }

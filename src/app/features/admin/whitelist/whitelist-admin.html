@@ -1,39 +1,88 @@
 <div class="max-w-3xl mx-auto">
   <h1 class="text-lg mb-1" style="color: var(--color-text)">Solicitudes de whitelist</h1>
-  <p class="text-sm mb-6" style="color: var(--color-text-muted)">Revisá y aprobá los pedidos de habilitación de email docente.</p>
+  <p class="text-sm mb-6" style="color: var(--color-text-muted)">
+    Revisá los pedidos de habilitación de emails docentes y resolvelos.
+  </p>
 
   @if (requests() === undefined) {
     <div class="flex justify-center py-16"><fu-spinner [size]="32" /></div>
   } @else if (requests() === null) {
-    <div class="fu-card !p-8 text-center" style="color: var(--color-danger)">No pudimos cargar las solicitudes.</div>
+    <div class="fu-card !p-10 text-center" style="color: var(--color-danger)">
+      No pudimos cargar las solicitudes de whitelist. Revisá que el servicio esté activo.
+    </div>
   } @else {
-    <div class="flex flex-col gap-3">
-      @for (request of requests(); track request.id) {
-        <div class="fu-card !p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-          <div class="flex-1 min-w-0">
-            <p class="font-semibold truncate" style="color: var(--color-text)">{{ request.email }}</p>
-            @if (request.reason) {
-              <p class="text-sm mt-0.5" style="color: var(--color-text-muted)">{{ request.reason }}</p>
-            }
-            <span
-              class="fu-badge mt-2"
-              [class.fu-badge--success]="request.status === 'APPROVED'"
-              [class.fu-badge--danger]="request.status === 'REJECTED'"
-              [class.fu-badge--warning]="request.status === 'PENDING'"
-            >
-              {{ request.status }}
-            </span>
+    <h2 class="text-base mb-3" style="color: var(--color-text)">Pendientes</h2>
+    <div class="flex flex-col gap-4">
+      @for (request of pending(); track request.id) {
+        <article class="fu-card !p-5">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <p class="font-semibold break-all" style="color: var(--color-text)">{{ request.email }}</p>
+              @if (request.createdAt) {
+                <p class="text-xs mt-1" style="color: var(--color-text-faint)">
+                  {{ request.createdAt | date: "dd/MM/yyyy HH:mm" }}
+                </p>
+              }
+              @if (request.reason) {
+                <p class="text-sm mt-1" style="color: var(--color-text-muted)">{{ request.reason }}</p>
+              }
+            </div>
+            <span class="fu-badge fu-badge--warning shrink-0">Pendiente</span>
           </div>
-          @if (request.status === 'PENDING') {
-            <div class="flex gap-2 shrink-0">
-              <button fuButton variant="secondary" size="sm" [loading]="processingId() === request.id" (click)="review(request, 'REJECTED')">Rechazar</button>
-              <button fuButton variant="primary" size="sm" [loading]="processingId() === request.id" (click)="review(request, 'APPROVED')">Aprobar</button>
+
+          <div class="mt-4">
+            <label class="fu-label" [for]="'rechazoMotivo-' + request.id">Motivo del rechazo (obligatorio al rechazar)</label>
+            <textarea
+              [id]="'rechazoMotivo-' + request.id"
+              class="fu-input"
+              rows="2"
+              [ngModel]="rejectionReasons()[request.id]"
+              (ngModelChange)="setRejectionReason(request.id, $event)"
+              placeholder="ej. el email no corresponde a la cátedra"
+            ></textarea>
+          </div>
+
+          @if (processingId() === request.id) {
+            <div class="mt-4"><fu-spinner [size]="18" /></div>
+          } @else {
+            <div class="mt-4 flex flex-wrap gap-2">
+              <button fuButton variant="secondary" size="sm" (click)="reject(request)">Rechazar</button>
+              <button fuButton variant="primary" size="sm" (click)="approve(request)">Aprobar</button>
             </div>
           }
-        </div>
+        </article>
       } @empty {
-        <div class="fu-card !p-10 text-center" style="color: var(--color-text-faint)">No hay solicitudes.</div>
+        <div class="fu-card !p-10 text-center" style="color: var(--color-text-faint)">
+          No hay solicitudes pendientes.
+        </div>
       }
     </div>
+
+    @if (resolved().length) {
+      <h2 class="text-base mt-8 mb-3" style="color: var(--color-text)">Resueltas</h2>
+      <div class="flex flex-col gap-3">
+        @for (request of resolved(); track request.id) {
+          <article class="fu-card !p-5">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0 flex-1">
+                <p class="font-semibold break-all" style="color: var(--color-text)">{{ request.email }}</p>
+                @if (request.rejectionReason) {
+                  <p class="text-sm mt-1" style="color: var(--color-text-muted)">
+                    Motivo: {{ request.rejectionReason }}
+                  </p>
+                }
+              </div>
+              <span
+                class="fu-badge"
+                [class.fu-badge--success]="request.status === 'APPROVED'"
+                [class.fu-badge--danger]="request.status === 'REJECTED'"
+              >
+                {{ statusLabel(request.status) }}
+              </span>
+            </div>
+          </article>
+        }
+      </div>
+    }
   }
 </div>

@@ -37,7 +37,7 @@ export class AdminService {
     return this.http.post<WhitelistRequest>(API.whitelistRequests, body);
   }
 
-  /** Inferred endpoint (not in the handoff) — confirm shape with backend. */
+  /** ADMIN review queue — GET /api/users/whitelist/requests (DEC-29). */
   listWhitelistRequests(): Observable<WhitelistRequest[]> {
     return this.http.get<WhitelistRequest[]>(API.whitelistRequests);
   }

@@ -19,8 +19,11 @@
           <input id="email" type="email" class="fu-input" formControlName="email" />
         </div>
         <div>
-          <label class="fu-label" for="reason">Motivo (opcional)</label>
-          <textarea id="reason" class="fu-input" rows="3" formControlName="reason"></textarea>
+          <label class="fu-label" for="reason">Motivo</label>
+          <textarea id="reason" class="fu-input" rows="3" formControlName="reason" placeholder="ej. designación de cátedra"></textarea>
+          @if (form.controls.reason.invalid && form.controls.reason.touched) {
+            <p class="fu-field-error">Contanos para qué se habilita este email.</p>
+          }
         </div>
 
         @if (errorMessage()) {

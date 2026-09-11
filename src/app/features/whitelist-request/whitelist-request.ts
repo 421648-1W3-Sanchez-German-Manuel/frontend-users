@@ -17,7 +17,7 @@ export class WhitelistRequestPage {
 
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    reason: [''],
+    reason: ['', Validators.required],
   });
 
   protected readonly loading = signal(false);
