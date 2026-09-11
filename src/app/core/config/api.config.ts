@@ -35,13 +35,12 @@ export const API = {
   me: `${API_BASE}/api/users/me`,
   onboarding: `${API_BASE}/api/users/me/onboarding`,
   profile: (id: string) => `${API_BASE}/api/users/profile/${id}`,
-  // NOTE: GET /api/users has no backend equivalent by design — the admin
-  // manages users by uuid (the demo prototype documents exactly that).
+  // GET /api/users is the ADMIN directory (active accounts, newest first).
   users: `${API_BASE}/api/users`,
   userById: (id: string) => `${API_BASE}/api/users/${id}`,
   userRole: (id: string) => `${API_BASE}/api/users/${id}/role`,
-  // whitelist: POST (professor) / GET (admin review queue, DEC-29) — the
-  // non-list endpoints live on the same controller.
+  // whitelist: POST (admin direct add) / GET (whitelist contents) — DEC-29.
+  whitelist: `${API_BASE}/api/users/whitelist`,
   whitelistRequests: `${API_BASE}/api/users/whitelist/requests`,
   whitelistRequestById: (id: string) => `${API_BASE}/api/users/whitelist/requests/${id}`,
 } as const;

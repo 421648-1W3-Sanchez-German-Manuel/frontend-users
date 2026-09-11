@@ -13,7 +13,7 @@ export interface AdminUser {
   firstNames: string;
   lastNames: string;
   email: string;
-  roles: Role[];
+  role: Role;
   accountStatus: AccountStatus;
   legajo?: string;
   createdAt?: string;
@@ -45,6 +45,11 @@ export interface WhitelistRequest {
 export interface CreateWhitelistRequest {
   email: string;
   reason?: string;
+}
+
+/** Matches the backend `AddEmailRequest` record (admin direct add). */
+export interface AddEmailRequest {
+  email: string;
 }
 
 /** Matches the backend `ResolveWhitelistRequest` record. */

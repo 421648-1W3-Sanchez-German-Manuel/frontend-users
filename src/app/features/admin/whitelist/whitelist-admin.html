@@ -4,6 +4,24 @@
     Revisá los pedidos de habilitación de emails docentes y resolvelos.
   </p>
 
+  <div class="fu-card !p-5 mb-8">
+    <h2 class="text-base mb-1" style="color: var(--color-text)">Habilitar email directo</h2>
+    <p class="text-sm mb-4" style="color: var(--color-text-muted)">
+      Agregá un email docente a la whitelist sin esperar su solicitud.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-2">
+      <input
+        class="fu-input flex-1"
+        placeholder="email@frc.utn.edu.ar"
+        [value]="directEmail()"
+        (input)="directEmail.set($any($event.target).value)"
+      />
+      <button fuButton variant="primary" size="sm" [disabled]="adding()" (click)="addDirect(directEmail())">
+        {{ adding() ? 'Agregando…' : 'Habilitar' }}
+      </button>
+    </div>
+  </div>
+
   @if (requests() === undefined) {
     <div class="flex justify-center py-16"><fu-spinner [size]="32" /></div>
   } @else if (requests() === null) {

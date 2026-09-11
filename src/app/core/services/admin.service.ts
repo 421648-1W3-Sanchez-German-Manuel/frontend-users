@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { API } from '../config/api.config';
 import {
+  AddEmailRequest,
   AdminUser,
   ChangeRoleRequest,
   CreateUserRequest,
@@ -16,7 +17,7 @@ import {
 export class AdminService {
   private readonly http = inject(HttpClient);
 
-  /** Inferred endpoint (not in the handoff) — confirm shape with backend. */
+  /** ADMIN directory — GET /api/users (active accounts, newest first). */
   listUsers(): Observable<AdminUser[]> {
     return this.http.get<AdminUser[]>(API.users);
   }
@@ -35,6 +36,11 @@ export class AdminService {
 
   createWhitelistRequest(body: CreateWhitelistRequest): Observable<WhitelistRequest> {
     return this.http.post<WhitelistRequest>(API.whitelistRequests, body);
+  }
+
+  /** ADMIN direct add — POST /api/users/whitelist (DEC-29). */
+  addEmailToWhitelist(body: AddEmailRequest): Observable<{ id: string }> {
+    return this.http.post<{ id: string }>(API.whitelist, body);
   }
 
   /** ADMIN review queue — GET /api/users/whitelist/requests (DEC-29). */

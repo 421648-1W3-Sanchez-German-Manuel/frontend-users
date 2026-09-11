@@ -22,12 +22,35 @@ export class WhitelistAdmin {
   protected readonly requests = signal<WhitelistRequest[] | null | undefined>(undefined);
   protected readonly processingId = signal<string | null>(null);
   protected readonly rejectionReasons = signal<Record<string, string>>({});
+  protected readonly directEmail = signal('');
+  protected readonly adding = signal(false);
 
   protected readonly pending = computed(() => this.requests()?.filter((r) => r.status === 'PENDING') ?? []);
   protected readonly resolved = computed(() => this.requests()?.filter((r) => r.status !== 'PENDING') ?? []);
 
   constructor() {
     this.load();
+  }
+
+  protected addDirect(email: string): void {
+    const value = email.trim();
+    if (!value) {
+      this.toast.error('Ingresá un email');
+      return;
+    }
+    if (this.adding()) return;
+    this.adding.set(true);
+    this.adminService.addEmailToWhitelist({ email: value }).subscribe({
+      next: () => {
+        this.adding.set(false);
+        this.directEmail.set('');
+        this.toast.success('Email habilitado en la whitelist');
+      },
+      error: () => {
+        this.adding.set(false);
+        this.toast.error('No pudimos habilitar el email');
+      },
+    });
   }
 
   setRejectionReason(id: string, value: string): void {

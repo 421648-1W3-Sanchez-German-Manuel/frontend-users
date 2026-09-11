@@ -39,9 +39,7 @@
                 <td class="px-5 py-3" style="color: var(--color-text)">{{ user.firstNames }} {{ user.lastNames }}</td>
                 <td class="px-5 py-3" style="color: var(--color-text-muted)">{{ user.email }}</td>
                 <td class="px-5 py-3">
-                  @for (role of user.roles; track role) {
-                    <span class="fu-badge fu-badge--primary mr-1">{{ role }}</span>
-                  }
+                  <span class="fu-badge fu-badge--primary">{{ user.role }}</span>
                 </td>
                 <td class="px-5 py-3">
                   <span class="fu-badge" [class.fu-badge--success]="user.accountStatus === 'ACTIVE'" [class.fu-badge--warning]="user.accountStatus !== 'ACTIVE'">
