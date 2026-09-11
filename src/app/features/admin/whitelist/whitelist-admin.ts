@@ -73,12 +73,16 @@ export class WhitelistAdmin {
     });
   }
 
-  private loadEntries(): void {
-    this.entries.set(undefined);
+  private loadEntries(showLoading = true, preserveScroll = false): void {
+    const scrollPosition = preserveScroll ? window.scrollY : null;
+    if (showLoading) this.entries.set(undefined);
     this.adminService
       .listWhitelist()
       .pipe(catchError(() => of(null)))
-      .subscribe((list) => this.entries.set(list));
+      .subscribe((list) => {
+        this.entries.set(list);
+        if (scrollPosition !== null) this.restoreScrollPosition(scrollPosition);
+      });
   }
 
   setRejectionReason(id: string, value: string): void {
@@ -107,16 +111,34 @@ export class WhitelistAdmin {
     this.processingId.set(request.id);
     this.adminService.reviewWhitelistRequest(request.id, body).subscribe({
       next: () => {
+        const scrollPosition = window.scrollY;
         this.processingId.set(null);
         this.toast.success(body.approve ? 'Solicitud aprobada' : 'Solicitud rechazada');
         this.setRejectionReason(request.id, '');
-        this.load();
+        this.requests.update(
+          (current) =>
+            current?.map((item) =>
+              item.id === request.id
+                ? {
+                    ...item,
+                    status: body.approve ? 'APPROVED' : 'REJECTED',
+                    rejectionReason: body.approve ? undefined : body.rejectionReason,
+                  }
+                : item
+            ) ?? current
+        );
+        this.restoreScrollPosition(scrollPosition);
+        if (body.approve) this.loadEntries(false, true);
       },
       error: () => {
         this.processingId.set(null);
         this.toast.error('No pudimos actualizar la solicitud');
       },
     });
+  }
+
+  private restoreScrollPosition(scrollPosition: number): void {
+    requestAnimationFrame(() => window.scrollTo(0, scrollPosition));
   }
 
   private load(): void {

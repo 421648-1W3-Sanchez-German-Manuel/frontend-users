@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
@@ -14,6 +15,7 @@ import { ApiError } from '../../core/models/problem-details.model';
 export class WhitelistRequestPage {
   private readonly fb = inject(FormBuilder);
   private readonly adminService = inject(AdminService);
+  private readonly location = inject(Location);
 
   protected readonly form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -21,7 +23,6 @@ export class WhitelistRequestPage {
   });
 
   protected readonly loading = signal(false);
-  protected readonly sent = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
   submit(): void {
@@ -34,8 +35,7 @@ export class WhitelistRequestPage {
     this.adminService.createWhitelistRequest(this.form.getRawValue()).subscribe({
       next: () => {
         this.loading.set(false);
-        this.sent.set(true);
-        this.form.reset();
+        this.location.back();
       },
       error: (error: unknown) => {
         this.loading.set(false);

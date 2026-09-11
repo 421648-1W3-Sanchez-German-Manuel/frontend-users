@@ -59,7 +59,7 @@ export class AdminService {
     return this.http.get<WhitelistRequest[]>(API.whitelistRequests);
   }
 
-  reviewWhitelistRequest(id: string, body: ReviewWhitelistRequest): Observable<WhitelistRequest> {
-    return this.http.patch<WhitelistRequest>(API.whitelistRequestById(id), body);
+  reviewWhitelistRequest(id: string, body: ReviewWhitelistRequest): Observable<void> {
+    return this.http.patch<void>(API.whitelistRequestById(id), body);
   }
 }
