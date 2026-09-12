@@ -368,7 +368,7 @@ export class DevMailbox implements OnDestroy {
       this.avisoFlujo.set(
         res.ok
           ? 'Echo pidió su token y llamó a users por el Gateway. Mirá las tres entradas en los logs.'
-          : (cuerpo.error ?? `Falló con status ${res.status}.`)
+          : (cuerpo?.detail ?? cuerpo?.error ?? `Falló con status ${res.status}.`)
       );
     } catch {
       this.avisoFlujoOk.set(false);
