@@ -374,11 +374,11 @@ export class DevMailbox implements OnDestroy {
       this.avisoFlujoOk.set(false);
       this.avisoFlujo.set('El flujo no respondió.');
     } finally {
-      this.disparando.set(false);
       // La escritura de la traza en Redis es fire-and-forget en el Gateway:
       // puede aterrizar justo despues de la respuesta. Esperar a que el
       // round-trip aparezca en la lista en vez de prometer "se refresca solo".
       await this.esperarTraza(id);
+      this.disparando.set(false);
     }
   }
 
