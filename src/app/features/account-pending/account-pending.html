@@ -1,16 +1,31 @@
-<fu-auth-shell title="Cuenta en validación" subtitle="Ya activaste tu cuenta, pero falta un paso más">
+<fu-auth-shell
+  [title]="isPendingEmail() ? 'Verificá tu email' : 'Cuenta en validación'"
+  [subtitle]="isPendingEmail() ? 'Tu cuenta ya fue registrada' : 'Ya activaste tu cuenta, pero falta un paso más'"
+>
   <div class="text-center">
-    <div class="text-5xl mb-4" style="animation: fu-float 3s ease-in-out infinite">⏳</div>
-    <p class="text-sm" style="color: var(--color-text-muted)">
-      El sistema de Cursos todavía tiene que validar tu padrón. Esto pasa de forma automática y no hay nada que
-      puedas hacer para acelerarlo — pero podés volver a chequear en cualquier momento.
-    </p>
+    @if (isPendingEmail()) {
+      <div class="text-5xl mb-4" style="animation: fu-float 3s ease-in-out infinite">📧</div>
+      <p class="text-sm" style="color: var(--color-text-muted)">
+        Abrí el enlace que enviamos a tu email y presioná el botón de activación. Si sos docente y tu email está en
+        la lista habilitada, después de verificarlo tu cuenta quedará activa sin pasar por el padrón.
+      </p>
+    } @else {
+      <div class="text-5xl mb-4" style="animation: fu-float 3s ease-in-out infinite">⏳</div>
+      <p class="text-sm" style="color: var(--color-text-muted)">
+        El sistema de Cursos todavía tiene que validar tu padrón. Esto pasa de forma automática y no hay nada que
+        puedas hacer para acelerarlo — pero podés volver a chequear en cualquier momento.
+      </p>
+    }
   </div>
 
   @switch (checkState()) {
     @case ('still-pending') {
       <div class="mt-5 fu-alert fu-alert--warning text-center">
-        Todavía sigue pendiente. Probá de nuevo más tarde.
+        @if (isPendingEmail()) {
+          Tu email todavía no fue verificado.
+        } @else {
+          Todavía sigue pendiente. Probá de nuevo más tarde.
+        }
       </div>
     }
     @case ('now-active') {
