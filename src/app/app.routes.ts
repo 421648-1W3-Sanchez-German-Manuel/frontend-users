@@ -127,6 +127,11 @@ export const routes: Routes = [
         canActivate: [roleGuard(['ADMIN'])],
         loadComponent: () => import('./features/admin/whitelist/whitelist-admin').then((m) => m.WhitelistAdmin),
       },
+      {
+        path: 'admin/configuracion',
+        canActivate: [roleGuard(['ADMIN'])],
+        loadComponent: () => import('./features/admin/global-config/global-config').then((m) => m.GlobalConfig),
+      },
     ],
   },
 
