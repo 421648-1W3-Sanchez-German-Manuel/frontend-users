@@ -354,15 +354,14 @@ export class DevMailbox implements OnDestroy {
    */
   protected async probarFlujo(): Promise<void> {
     const id = this.tokenStore.userId();
-    const token = this.tokenStore.accessToken();
-    if (!id || !token) return;
+    if (!id) return;
 
     this.disparando.set(true);
     this.avisoFlujo.set(null);
     try {
-      const res = await fetch(`/api/echo/cliente/perfil/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // Sin Authorization a mano: fu_at es HttpOnly, el navegador la manda
+      // sola en este fetch same-origin. El Gateway ya la acepta (converter).
+      const res = await fetch(`/api/echo/cliente/perfil/${id}`);
       const cuerpo = await res.json();
       this.avisoFlujoOk.set(res.ok);
       this.avisoFlujo.set(

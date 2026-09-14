@@ -1,15 +1,18 @@
 export type Role = 'STUDENT' | 'PROFESSOR' | 'ADMIN';
 export type AccountStatus = 'PENDING_COURSE' | 'ACTIVE' | 'SUSPENDED' | string;
 
-export interface AccessTokenClaims {
+/**
+ * Estado de sesión derivado de GET /api/users/me, no de un JWT decodificado.
+ * Con el access token en una cookie HttpOnly (fu_at) ya no hay nada que el
+ * JS pueda leer ni decodificar — esto reemplaza a los claims del token como
+ * la fuente de roles/gates en memoria.
+ */
+export interface SessionClaims {
   sub: string;
-  sid: string;
   roles: Role[];
   est: AccountStatus;
   pwd: boolean;
   onb: boolean;
-  iss: string;
-  exp: number;
 }
 
 export interface LoginRequest {
@@ -27,18 +30,12 @@ export interface Verify2faRequest {
   code: string;
 }
 
-export interface TokenResponse {
-  accessToken: string;
-  refreshToken: string;
+/**
+ * Lo que recibe el cliente tras login/refresh. Nunca los tokens: viajan en
+ * las cookies HttpOnly fu_at/fu_rt, que el navegador adjunta solo.
+ */
+export interface SessionResponse {
   expiresIn: number;
-}
-
-export interface RefreshRequest {
-  refreshToken: string;
-}
-
-export interface LogoutRequest {
-  refreshToken?: string;
 }
 
 export interface StudentRegistrationRequest {
