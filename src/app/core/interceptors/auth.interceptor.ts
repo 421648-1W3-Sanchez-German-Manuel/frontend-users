@@ -2,7 +2,6 @@ import { HttpContextToken, HttpErrorResponse, HttpInterceptorFn } from '@angular
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, switchMap, throwError, timer } from 'rxjs';
-import { PUBLIC_PATHS } from '../config/api.config';
 import { ApiError, ProblemDetails, problemTypeSlug } from '../models/problem-details.model';
 import { ToastService } from '../services/toast.service';
 import { TokenStoreService } from '../services/token-store.service';
@@ -25,6 +24,15 @@ const INLINE_HANDLED = new Set([
 
 const RETRIED_503 = new HttpContextToken<boolean>(() => false);
 
+/**
+ * Para el chequeo de sesión al bootear la app (AuthService.restoreSession):
+ * un visitante anónimo en una página pública (login, activación por link)
+ * también dispara ese GET /me, y un 401 ahí es esperado, no un evento de
+ * sesión perdida. Sin este flag, el caso de abajo redirigiría a /login por
+ * encima de la ruta pública que la persona en realidad quería abrir.
+ */
+export const SILENT_AUTH_CHECK = new HttpContextToken<boolean>(() => false);
+
 function isProblemDetails(value: unknown): value is ProblemDetails {
   return (
     !!value &&
@@ -44,12 +52,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const toast = inject(ToastService);
 
-  const isPublic = PUBLIC_PATHS.some((path) => req.url.includes(path));
-  const accessToken = tokenStore.accessToken();
-  const authedReq =
-    !isPublic && accessToken ? req.clone({ setHeaders: { Authorization: `Bearer ${accessToken}` } }) : req;
-
-  return next(authedReq).pipe(
+  return next(req).pipe(
     catchError((error: unknown) => {
       if (!(error instanceof HttpErrorResponse) || !isProblemDetails(error.error)) {
         return throwError(() => error);
@@ -63,7 +66,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         case 'session-superseded':
         case 'not-authenticated': {
           tokenStore.clear();
-          if (!router.url.startsWith('/login')) {
+          if (!req.context.get(SILENT_AUTH_CHECK) && !router.url.startsWith('/login')) {
             router.navigate(['/login'], { queryParams: { motivo: slug } });
           }
           return throwError(() => apiError);
@@ -88,7 +91,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           }
           const retryAfterSeconds = Number(error.headers.get('Retry-After')) || 1;
           return timer(retryAfterSeconds * 1000).pipe(
-            switchMap(() => next(authedReq.clone({ context: authedReq.context.set(RETRIED_503, true) })))
+            switchMap(() => next(req.clone({ context: req.context.set(RETRIED_503, true) })))
           );
         }
 

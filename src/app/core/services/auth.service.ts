@@ -1,24 +1,24 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, Subject, catchError, finalize, of, shareReplay, tap, throwError, timer } from 'rxjs';
+import { HttpClient, HttpContext } from '@angular/common/http';
+import { Observable, catchError, finalize, map, of, shareReplay, switchMap, tap } from 'rxjs';
 import { API } from '../config/api.config';
+import { SILENT_AUTH_CHECK } from '../interceptors/auth.interceptor';
+import { ApiError } from '../models/problem-details.model';
 import { TokenStoreService } from './token-store.service';
 import {
   ActivateAccountRequest,
   GestorRegistrationRequest,
   LoginChallengeResponse,
   LoginRequest,
-  LogoutRequest,
   OnboardingRequest,
   PasswordChangeRequest,
   PasswordResetConfirmRequest,
   PasswordResetRequest,
   ProfessorRegistrationRequest,
-  RefreshRequest,
   ResendActivationRequest,
+  SessionResponse,
   StudentRegistrationRequest,
   TermsOfService,
-  TokenResponse,
   Verify2faRequest,
   MeResponse,
 } from '../models/auth.model';
@@ -28,43 +28,59 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly tokenStore = inject(TokenStoreService);
 
-  private refreshInFlight$: Observable<TokenResponse> | null = null;
+  private refreshInFlight$: Observable<SessionResponse> | null = null;
   private silentRefreshTimer: ReturnType<typeof setTimeout> | null = null;
 
   login(body: LoginRequest): Observable<LoginChallengeResponse> {
     return this.http.post<LoginChallengeResponse>(API.login, body);
   }
 
-  verify2fa(body: Verify2faRequest): Observable<TokenResponse> {
-    return this.http.post<TokenResponse>(API.verify2fa, body).pipe(
-      tap((tokens) => {
-        this.tokenStore.setSession(tokens);
-        this.scheduleSilentRefresh(tokens.expiresIn);
-      })
+  /**
+   * El servidor deja fu_at/fu_rt puestas como Set-Cookie; acá solo llega
+   * expiresIn. Encadena un GET /me antes de completar: es la única forma de
+   * conocer roles/gates ahora que no hay JWT que decodificar, y el llamador
+   * (login-flow-state, guards) necesita esos claims ya poblados apenas esto
+   * emite — por eso va con switchMap y no como una suscripción aparte.
+   */
+  verify2fa(body: Verify2faRequest): Observable<SessionResponse> {
+    return this.http.post<SessionResponse>(API.verify2fa, body).pipe(
+      tap((session) => this.scheduleSilentRefresh(session.expiresIn)),
+      switchMap((session) => this.pobladoDeClaims(session))
     );
   }
 
   /** Single-flight refresh: concurrent callers share the same in-flight request. */
-  refresh(): Observable<TokenResponse> {
+  refresh(): Observable<SessionResponse> {
     if (this.refreshInFlight$) {
       return this.refreshInFlight$;
     }
-    const refreshToken = this.tokenStore.refreshToken();
-    if (!refreshToken) {
-      return throwError(() => new Error('no-refresh-token'));
-    }
-    const body: RefreshRequest = { refreshToken };
-    this.refreshInFlight$ = this.http.post<TokenResponse>(API.refresh, body).pipe(
-      tap((tokens) => {
-        this.tokenStore.setSession(tokens);
-        this.scheduleSilentRefresh(tokens.expiresIn);
-      }),
+    // Sin body: fu_rt viaja sola, como cookie — el navegador la adjunta.
+    this.refreshInFlight$ = this.http.post<SessionResponse>(API.refresh, {}).pipe(
+      tap((session) => this.scheduleSilentRefresh(session.expiresIn)),
+      switchMap((session) => this.pobladoDeClaims(session)),
       shareReplay(1),
       finalize(() => {
         this.refreshInFlight$ = null;
       })
     );
     return this.refreshInFlight$;
+  }
+
+  /**
+   * Puebla tokenStore desde /me y vuelve a emitir el SessionResponse
+   * original. Marca la sesión establecida ANTES de llamar a /me: una cuenta
+   * recién logueada pero con un gate pendiente (PENDING_COURSE, onboarding)
+   * hace que /me responda 403 — el login en sí fue exitoso igual, y
+   * authGuard necesita ver isAuthenticated()=true para no rebotar la
+   * redirección del interceptor (a /cuenta-pendiente o /onboarding) de
+   * vuelta a /login.
+   */
+  private pobladoDeClaims(session: SessionResponse): Observable<SessionResponse> {
+    this.tokenStore.markSessionEstablished();
+    return this.me().pipe(
+      tap((me) => this.tokenStore.setFromMe(me)),
+      map(() => session)
+    );
   }
 
   private scheduleSilentRefresh(expiresInSeconds: number): void {
@@ -76,9 +92,9 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    const refreshToken = this.tokenStore.refreshToken() ?? undefined;
-    const body: LogoutRequest = refreshToken ? { refreshToken } : {};
-    return this.http.post<void>(API.logout, body).pipe(
+    // Sin body: fu_rt viaja sola, como cookie. El servidor la lee de ahí para
+    // revocar la familia, y responde con fu_at/fu_rt puestas en Max-Age=0.
+    return this.http.post<void>(API.logout, {}).pipe(
       catchError(() => of(void 0)),
       finalize(() => this.clearLocalSession())
     );
@@ -87,6 +103,38 @@ export class AuthService {
   clearLocalSession(): void {
     if (this.silentRefreshTimer) clearTimeout(this.silentRefreshTimer);
     this.tokenStore.clear();
+  }
+
+  /**
+   * Al bootear la app (ver app.config.ts): la única forma de saber si hay
+   * sesión es preguntarle al servidor. Nunca falla ni bloquea el arranque —
+   * un 401 acá es el caso normal de un visitante sin sesión, no un error.
+   * SILENT_AUTH_CHECK le dice al interceptor que no redirija a /login por
+   * este 401 en particular: haría eso por encima de la ruta pública que la
+   * persona en realidad quería abrir (login, activación por link, etc).
+   */
+  restoreSession(): Observable<void> {
+    const context = new HttpContext().set(SILENT_AUTH_CHECK, true);
+    return this.http.get<MeResponse>(API.me, { context }).pipe(
+      tap((me) => this.tokenStore.setFromMe(me)),
+      map(() => void 0),
+      catchError((error: unknown) => {
+        // Un gate (pending-account, onboarding-pending, password-change) NO
+        // es "sin sesión": la cookie es válida, el interceptor ya redirigió
+        // a la pantalla del gate, y esa ruta necesita isAuthenticated()=true
+        // para no rebotarla a /login. Solo se limpia la sesión de verdad
+        // ante not-authenticated/session-closed/session-superseded.
+        const esGate =
+          error instanceof ApiError &&
+          !['not-authenticated', 'session-closed', 'session-superseded'].includes(error.slug ?? '');
+        if (esGate) {
+          this.tokenStore.markSessionEstablished();
+        } else {
+          this.tokenStore.clear();
+        }
+        return of(void 0);
+      })
+    );
   }
 
   registerStudent(body: StudentRegistrationRequest): Observable<void> {
