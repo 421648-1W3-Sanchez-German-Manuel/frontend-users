@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { AdminService } from '../../../core/services/admin.service';
+import { TokenStoreService } from '../../../core/services/token-store.service';
 import { Spinner } from '../../../shared/ui/spinner/spinner';
 
 @Component({
@@ -14,7 +15,10 @@ import { Spinner } from '../../../shared/ui/spinner/spinner';
 })
 export class UsersList {
   private readonly adminService = inject(AdminService);
+  private readonly tokenStore = inject(TokenStoreService);
 
+  /** New-user alta is ADMIN-only: it creates ADMIN accounts, see user-create.ts. */
+  protected readonly isAdmin = computed(() => this.tokenStore.isAdmin());
   protected readonly search = signal('');
   protected readonly users = toSignal(this.adminService.listUsers().pipe(catchError(() => of(null))), {
     initialValue: undefined,

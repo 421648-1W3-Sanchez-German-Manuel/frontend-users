@@ -4,7 +4,9 @@
       <h1 class="text-lg" style="color: var(--color-text)">Usuarios</h1>
       <p class="text-sm mt-1" style="color: var(--color-text-muted)">Gestión de cuentas de la plataforma.</p>
     </div>
-    <a routerLink="/admin/usuarios/nuevo" class="fu-btn fu-btn--primary">+ Nuevo usuario</a>
+    @if (isAdmin()) {
+      <a routerLink="/admin/usuarios/nuevo" class="fu-btn fu-btn--primary">+ Nuevo usuario</a>
+    }
   </div>
 
   <input
@@ -47,14 +49,16 @@
                   </span>
                 </td>
                 <td class="px-5 py-3 text-right whitespace-nowrap">
-                  <a [routerLink]="['/admin/usuarios', user.id, 'rol']" class="text-xs font-medium hover:underline mr-3" style="color: var(--color-cyan)">Rol</a>
-                  <a
-                    [routerLink]="['/admin/usuarios', user.id, 'eliminar']"
-                    [state]="{ email: user.email, name: user.firstNames + ' ' + user.lastNames }"
-                    class="text-xs font-medium hover:underline"
-                    style="color: var(--color-danger)"
-                    >Eliminar</a
-                  >
+                  @if (isAdmin() || user.role !== 'ADMIN') {
+                    <a [routerLink]="['/admin/usuarios', user.id, 'rol']" class="text-xs font-medium hover:underline mr-3" style="color: var(--color-cyan)">Rol</a>
+                    <a
+                      [routerLink]="['/admin/usuarios', user.id, 'eliminar']"
+                      [state]="{ email: user.email, name: user.firstNames + ' ' + user.lastNames }"
+                      class="text-xs font-medium hover:underline"
+                      style="color: var(--color-danger)"
+                      >Eliminar</a
+                    >
+                  }
                 </td>
               </tr>
             } @empty {

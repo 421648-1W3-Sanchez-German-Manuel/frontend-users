@@ -29,17 +29,18 @@ export const API = {
   passwordResetConfirm: `${API_BASE}/api/users/public/auth/password/reset/confirm`,
   registerStudent: `${API_BASE}/api/users/public/registration/student`,
   registerProfessor: `${API_BASE}/api/users/public/registration/professor`,
+  registerGestor: `${API_BASE}/api/users/public/registration/gestor`,
   activate: `${API_BASE}/api/users/public/registration/activate`,
   resendActivation: `${API_BASE}/api/users/public/registration/resend-activation`,
   terms: `${API_BASE}/api/users/public/legal/terms`,
   me: `${API_BASE}/api/users/me`,
   onboarding: `${API_BASE}/api/users/me/onboarding`,
   profile: (id: string) => `${API_BASE}/api/users/profile/${id}`,
-  // GET /api/users is the ADMIN directory (active accounts, newest first).
+  // GET /api/users is the ADMIN/GESTOR directory (active accounts, newest first).
   users: `${API_BASE}/api/users`,
   userById: (id: string) => `${API_BASE}/api/users/${id}`,
   userRole: (id: string) => `${API_BASE}/api/users/${id}/role`,
-  // whitelist: POST (admin direct add) / GET (whitelist contents) — DEC-29.
+  // whitelist: POST (ADMIN/GESTOR direct add) / GET (whitelist contents) — DEC-29.
   whitelist: `${API_BASE}/api/users/whitelist`,
   whitelistRequests: `${API_BASE}/api/users/whitelist/requests`,
   whitelistRequestById: (id: string) => `${API_BASE}/api/users/whitelist/requests/${id}`,

@@ -47,15 +47,20 @@ export interface CreateWhitelistRequest {
   reason?: string;
 }
 
-/** Matches the backend `AddEmailRequest` record (admin direct add). */
+/** The whitelist only ever grants PROFESSOR or GESTOR — never ADMIN. */
+export type WhitelistableRole = 'PROFESSOR' | 'GESTOR';
+
+/** Matches the backend `AddEmailRequest` record (ADMIN/GESTOR direct add). */
 export interface AddEmailRequest {
   email: string;
+  role: WhitelistableRole;
 }
 
-/** Row of the whitelist itself (admin CRUD) — GET /api/users/whitelist. */
+/** Row of the whitelist itself (ADMIN/GESTOR CRUD) — GET /api/users/whitelist. */
 export interface WhitelistEntry {
   id: string;
   email: string;
+  role: WhitelistableRole;
   createdAt?: string;
 }
 
