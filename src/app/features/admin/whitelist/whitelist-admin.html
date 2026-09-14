@@ -16,6 +16,10 @@
         [value]="directEmail()"
         (input)="directEmail.set($any($event.target).value)"
       />
+      <select class="fu-input sm:w-40" [value]="directRole()" (change)="directRole.set($any($event.target).value)">
+        <option value="PROFESSOR">Profesor</option>
+        <option value="GESTOR">Gestor</option>
+      </select>
       <button fuButton variant="primary" size="sm" [disabled]="adding()" (click)="addDirect(directEmail())">
         {{ adding() ? 'Agregando…' : 'Habilitar' }}
       </button>
@@ -42,6 +46,7 @@
             <thead>
               <tr style="background: var(--color-surface-2)">
                 <th class="text-left px-5 py-3 font-semibold" style="color: var(--color-text-muted)">Email</th>
+                <th class="text-left px-5 py-3 font-semibold" style="color: var(--color-text-muted)">Rol</th>
                 <th class="text-left px-5 py-3 font-semibold" style="color: var(--color-text-muted)">Agregado</th>
                 <th class="text-right px-5 py-3 font-semibold" style="color: var(--color-text-muted)">Acción</th>
               </tr>
@@ -50,6 +55,9 @@
               @for (entry of entries()!; track entry.id) {
                 <tr class="border-t" style="border-color: var(--color-border)">
                   <td class="px-5 py-3 break-all" style="color: var(--color-text)">{{ entry.email }}</td>
+                  <td class="px-5 py-3">
+                    <span class="fu-badge fu-badge--primary">{{ entry.role }}</span>
+                  </td>
                   <td class="px-5 py-3" style="color: var(--color-text-muted)">
                     @if (entry.createdAt) {
                       {{ entry.createdAt | date: "dd/MM/yyyy HH:mm" }}

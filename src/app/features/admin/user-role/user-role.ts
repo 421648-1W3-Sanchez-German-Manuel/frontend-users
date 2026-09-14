@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Role } from '../../../core/models/auth.model';
 import { AdminService } from '../../../core/services/admin.service';
+import { TokenStoreService } from '../../../core/services/token-store.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ApiError } from '../../../core/models/problem-details.model';
 import { FuButton } from '../../../shared/ui/button/button';
 
-const ALL_ROLES: Role[] = ['STUDENT', 'PROFESSOR', 'ADMIN'];
+const ALL_ROLES: Role[] = ['STUDENT', 'PROFESSOR', 'GESTOR', 'ADMIN'];
 
 @Component({
   selector: 'fu-user-role',
@@ -17,11 +18,15 @@ const ALL_ROLES: Role[] = ['STUDENT', 'PROFESSOR', 'ADMIN'];
 })
 export class UserRole {
   private readonly adminService = inject(AdminService);
+  private readonly tokenStore = inject(TokenStoreService);
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
 
   readonly id = input.required<string>();
-  protected readonly allRoles = ALL_ROLES;
+  /** A GESTOR manages PROFESSOR/GESTOR only — ADMIN is never an option for it. */
+  protected readonly allRoles = computed(() =>
+    this.tokenStore.isAdmin() ? ALL_ROLES : ALL_ROLES.filter((r) => r !== 'ADMIN')
+  );
   protected readonly selectedRoles = signal<Role[]>([]);
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);

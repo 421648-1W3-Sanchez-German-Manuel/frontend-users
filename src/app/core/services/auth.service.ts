@@ -5,6 +5,7 @@ import { API } from '../config/api.config';
 import { TokenStoreService } from './token-store.service';
 import {
   ActivateAccountRequest,
+  GestorRegistrationRequest,
   LoginChallengeResponse,
   LoginRequest,
   LogoutRequest,
@@ -94,6 +95,10 @@ export class AuthService {
 
   registerProfessor(body: ProfessorRegistrationRequest): Observable<void> {
     return this.http.post<void>(API.registerProfessor, body);
+  }
+
+  registerGestor(body: GestorRegistrationRequest): Observable<void> {
+    return this.http.post<void>(API.registerGestor, body);
   }
 
   activate(body: ActivateAccountRequest): Observable<void> {

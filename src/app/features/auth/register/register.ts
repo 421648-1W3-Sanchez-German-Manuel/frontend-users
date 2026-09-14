@@ -9,7 +9,7 @@ import { PasswordStrength } from '../../../shared/ui/password-strength/password-
 import { AuthService } from '../../../core/services/auth.service';
 import { ApiError } from '../../../core/models/problem-details.model';
 
-type Tab = 'student' | 'professor';
+type Tab = 'student' | 'professor' | 'gestor';
 
 /** Mirrors PasswordPolicy.MIN_CHARACTERS in users-service — keep both in sync. */
 const PASSWORD_VALIDATORS = [
@@ -57,6 +57,14 @@ export class Register {
     acceptTerms: [false, Validators.requiredTrue],
   });
 
+  protected readonly gestorForm = this.fb.nonNullable.group({
+    firstNames: ['', Validators.required],
+    lastNames: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', PASSWORD_VALIDATORS],
+    acceptTerms: [false, Validators.requiredTrue],
+  });
+
   setTab(tab: Tab): void {
     this.tab.set(tab);
     this.errorMessage.set(null);
@@ -69,7 +77,8 @@ export class Register {
       return;
     }
 
-    const form = this.tab() === 'student' ? this.studentForm : this.professorForm;
+    const form =
+      this.tab() === 'student' ? this.studentForm : this.tab() === 'professor' ? this.professorForm : this.gestorForm;
     if (form.invalid || this.loading()) {
       form.markAllAsTouched();
       return;
@@ -84,9 +93,14 @@ export class Register {
             const { acceptTerms: _accept, ...body } = this.studentForm.getRawValue();
             return this.authService.registerStudent({ ...body, termsVersion });
           })()
-        : (() => {
+        : this.tab() === 'professor'
+        ? (() => {
             const { acceptTerms: _accept, ...body } = this.professorForm.getRawValue();
             return this.authService.registerProfessor({ ...body, termsVersion });
+          })()
+        : (() => {
+            const { acceptTerms: _accept, ...body } = this.gestorForm.getRawValue();
+            return this.authService.registerGestor({ ...body, termsVersion });
           })();
 
     request$.subscribe({

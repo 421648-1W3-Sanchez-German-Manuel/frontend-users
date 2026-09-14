@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 const ROLE_LABEL: Record<string, string> = {
   STUDENT: 'Estudiante',
   PROFESSOR: 'Profesor',
+  GESTOR: 'Gestor',
   ADMIN: 'Administrador',
 };
 
