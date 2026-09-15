@@ -48,13 +48,19 @@ export class AuthService {
     );
   }
 
-  /** Single-flight refresh: concurrent callers share the same in-flight request. */
-  refresh(): Observable<SessionResponse> {
+  /**
+   * Single-flight refresh: concurrent callers share the same in-flight
+   * request. `silent` evita que el interceptor redirija a /login si ESTE
+   * llamado falla — lo usa restoreSession() al arrancar, donde un 401 sin
+   * fu_rt es un visitante anonimo, no una sesion perdida (ver ahi).
+   */
+  refresh(opts: { silent?: boolean } = {}): Observable<SessionResponse> {
     if (this.refreshInFlight$) {
       return this.refreshInFlight$;
     }
     // Sin body: fu_rt viaja sola, como cookie — el navegador la adjunta.
-    this.refreshInFlight$ = this.http.post<SessionResponse>(API.refresh, {}).pipe(
+    const context = new HttpContext().set(SILENT_AUTH_CHECK, opts.silent ?? false);
+    this.refreshInFlight$ = this.http.post<SessionResponse>(API.refresh, {}, { context }).pipe(
       tap((session) => this.scheduleSilentRefresh(session.expiresIn)),
       switchMap((session) => this.pobladoDeClaims(session)),
       shareReplay(1),
@@ -130,8 +136,20 @@ export class AuthService {
           this.tokenStore.markSessionEstablished();
           return this.refreshSilencioso();
         }
-        this.tokenStore.clear();
-        return of(void 0);
+
+        // fu_at (access-ttl: PT10M) pudo vencer con fu_rt todavia viva
+        // (refresh-ttl: P7D) — ej: la pestaña estuvo cerrada mas de 10
+        // minutos. { silent: true } es necesario aca y no en
+        // refreshSilencioso(): un visitante anonimo en una ruta publica
+        // tampoco tiene fu_rt, y ese 401 es el caso normal de este
+        // bootstrap, no una sesion perdida que amerite mandarlo a /login.
+        return this.refresh({ silent: true }).pipe(
+          map(() => void 0),
+          catchError(() => {
+            this.tokenStore.clear();
+            return of(void 0);
+          })
+        );
       })
     );
   }
