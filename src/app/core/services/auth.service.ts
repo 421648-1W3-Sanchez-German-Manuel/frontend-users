@@ -116,7 +116,7 @@ export class AuthService {
     const context = new HttpContext().set(SILENT_AUTH_CHECK, true);
     return this.http.get<MeResponse>(API.me, { context }).pipe(
       tap((me) => this.tokenStore.setFromMe(me)),
-      map(() => void 0),
+      switchMap(() => this.refreshSilencioso()),
       catchError((error: unknown) => {
         // Un gate (pending-account, onboarding-pending, password-change) NO
         // es "sin sesión": la cookie es válida, el interceptor ya redirigió
@@ -128,11 +128,26 @@ export class AuthService {
           !['not-authenticated', 'session-closed', 'session-superseded'].includes(error.slug ?? '');
         if (esGate) {
           this.tokenStore.markSessionEstablished();
-        } else {
-          this.tokenStore.clear();
+          return this.refreshSilencioso();
         }
+        this.tokenStore.clear();
         return of(void 0);
       })
+    );
+  }
+
+  /**
+   * El timer de scheduleSilentRefresh vive en memoria: no sobrevive un F5.
+   * Sin este refresh extra tras restaurar la sesión, fu_at se queda sin
+   * renovar hasta que vence (~10 min) y el interceptor manda a /login aunque
+   * fu_rt siga viva. Se ignora el error a propósito: restoreSession() nunca
+   * falla, y si fu_rt tampoco es válida ya lo maneja el interceptor en la
+   * próxima llamada real.
+   */
+  private refreshSilencioso(): Observable<void> {
+    return this.refresh().pipe(
+      map(() => void 0),
+      catchError(() => of(void 0))
     );
   }
 
