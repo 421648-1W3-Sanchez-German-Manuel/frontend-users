@@ -1,46 +1,39 @@
 import { Injectable, computed, signal } from '@angular/core';
-import { AccessTokenClaims, Role, TokenResponse } from '../models/auth.model';
+import { MeResponse, Role, SessionClaims } from '../models/auth.model';
 
-const ACCESS_KEY = 'fu.accessToken';
-const REFRESH_KEY = 'fu.refreshToken';
-
-function decodeClaims(accessToken: string): AccessTokenClaims | null {
-  try {
-    const payload = accessToken.split('.')[1];
-    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
-    const json = decodeURIComponent(
-      atob(padded)
-        .split('')
-        .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
-        .join('')
-    );
-    return JSON.parse(json) as AccessTokenClaims;
-  } catch {
-    return null;
-  }
+function claimsDeMe(me: MeResponse): SessionClaims {
+  return {
+    sub: me.id,
+    roles: [me.role],
+    est: me.accountStatus,
+    pwd: me.mustChangePassword,
+    onb: me.firstLogin,
+  };
 }
 
 /**
- * Holds the in-memory session state. Gate claims (est/pwd/onb) only change on
- * next login: completing onboarding or changing the password does NOT refresh
- * the token in memory, by backend design (see handoff §2).
+ * Estado de sesión en memoria — nunca persistido. Los tokens viajan en
+ * cookies HttpOnly (fu_at/fu_rt): el navegador los adjunta solo en cada
+ * request y JS no puede leerlos, escribirlos ni borrarlos. No hay nada que
+ * guardar acá ni ningún JWT que decodificar.
+ *
+ * Consecuencia: al recargar la página no hay forma sincrónica de saber si
+ * hay sesión — hay que preguntarle al servidor (GET /api/users/me). Eso lo
+ * hace AuthService.restoreSession() al bootear la app (ver app.config.ts).
+ *
+ * Gate claims (est/pwd/onb) reflejan el estado la última vez que se llamó a
+ * /me (login, refresh, o el bootstrap), no necesariamente el instante actual
+ * — el backend es quien realmente lo aplica en cada request. patchClaims()
+ * sigue existiendo para el mismo atajo optimista de siempre: reflejar en la
+ * UI que el onboarding terminó sin esperar un round-trip.
  */
 @Injectable({ providedIn: 'root' })
 export class TokenStoreService {
-  private readonly _accessToken = signal<string | null>(localStorage.getItem(ACCESS_KEY));
-  private readonly _refreshToken = signal<string | null>(localStorage.getItem(REFRESH_KEY));
-  private readonly _claims = signal<AccessTokenClaims | null>(this.decodeCurrent());
+  private readonly _claims = signal<SessionClaims | null>(null);
+  private readonly _authenticated = signal(false);
 
-  readonly accessToken = this._accessToken.asReadonly();
-  readonly refreshToken = this._refreshToken.asReadonly();
   readonly claims = this._claims.asReadonly();
-
-  readonly isAuthenticated = computed(() => {
-    const claims = this._claims();
-    if (!claims) return false;
-    return claims.exp * 1000 > Date.now();
-  });
+  readonly isAuthenticated = this._authenticated.asReadonly();
 
   readonly roles = computed<Role[]>(() => this._claims()?.roles ?? []);
   readonly isAdmin = computed(() => this.roles().includes('ADMIN'));
@@ -49,48 +42,34 @@ export class TokenStoreService {
   readonly onboardingPending = computed(() => this._claims()?.onb ?? false);
   readonly userId = computed(() => this._claims()?.sub ?? null);
 
-  /** Merge partial claims into the in-memory token without a network round-trip. */
-  patchClaims(partial: Partial<AccessTokenClaims>): void {
+  /** Tras login, refresh, o el bootstrap de la app: puebla la sesión desde /me. */
+  setFromMe(me: MeResponse): void {
+    this._claims.set(claimsDeMe(me));
+    this._authenticated.set(true);
+  }
+
+  /**
+   * Marca que hay sesión SIN esperar a /me. Necesario porque /me puede fallar
+   * con un 403 de gate (cuenta pendiente, onboarding) para una cuenta
+   * perfectamente autenticada — y authGuard, que solo mira isAuthenticated(),
+   * tiene que dejar pasar a /cuenta-pendiente u /onboarding en ese caso. Sin
+   * esto, el interceptor redirige ahí y authGuard rebota derecho a /login,
+   * porque nunca se llamó a setFromMe().
+   */
+  markSessionEstablished(): void {
+    this._authenticated.set(true);
+  }
+
+  /** Merge parcial sin red — atajo optimista tras completar onboarding. */
+  patchClaims(partial: Partial<SessionClaims>): void {
     const current = this._claims();
     if (current) {
       this._claims.set({ ...current, ...partial });
     }
   }
 
-  constructor() {
-    window.addEventListener('storage', (event) => {
-      if (event.key === ACCESS_KEY || event.key === REFRESH_KEY) {
-        this._accessToken.set(localStorage.getItem(ACCESS_KEY));
-        this._refreshToken.set(localStorage.getItem(REFRESH_KEY));
-        this._claims.set(this.decodeCurrent());
-      }
-    });
-  }
-
-  private decodeCurrent(): AccessTokenClaims | null {
-    const token = localStorage.getItem(ACCESS_KEY);
-    return token ? decodeClaims(token) : null;
-  }
-
-  setSession(tokens: TokenResponse): void {
-    localStorage.setItem(ACCESS_KEY, tokens.accessToken);
-    localStorage.setItem(REFRESH_KEY, tokens.refreshToken);
-    this._accessToken.set(tokens.accessToken);
-    this._refreshToken.set(tokens.refreshToken);
-    this._claims.set(decodeClaims(tokens.accessToken));
-  }
-
   clear(): void {
-    localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(REFRESH_KEY);
-    this._accessToken.set(null);
-    this._refreshToken.set(null);
     this._claims.set(null);
-  }
-
-  expiresInMs(): number | null {
-    const claims = this._claims();
-    if (!claims) return null;
-    return claims.exp * 1000 - Date.now();
+    this._authenticated.set(false);
   }
 }

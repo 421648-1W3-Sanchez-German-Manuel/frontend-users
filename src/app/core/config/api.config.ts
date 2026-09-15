@@ -45,8 +45,3 @@ export const API = {
   whitelistRequests: `${API_BASE}/api/users/whitelist/requests`,
   whitelistRequestById: (id: string) => `${API_BASE}/api/users/whitelist/requests/${id}`,
 } as const;
-
-/** Requests the interceptor must never attach a bearer token to. */
-export const PUBLIC_PATHS = [
-  '/api/users/public/',
-] as const;
