@@ -16,7 +16,7 @@
         [value]="directEmail()"
         (input)="directEmail.set($any($event.target).value)"
       />
-      <select class="fu-input sm:w-40" [value]="directRole()" (change)="directRole.set($any($event.target).value)">
+      <select class="fu-input sm:w-40" aria-label="Rol a habilitar" [value]="directRole()" (change)="directRole.set($any($event.target).value)">
         <option value="PROFESSOR">Profesor</option>
         <option value="GESTOR">Gestor</option>
       </select>
