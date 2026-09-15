@@ -104,9 +104,10 @@ export const routes: Routes = [
       },
       {
         path: 'admin/usuarios',
-        canActivate: [roleGuard(['ADMIN'])],
+        canActivate: [roleGuard(['ADMIN', 'GESTOR'])],
         loadComponent: () => import('./features/admin/users-list/users-list').then((m) => m.UsersList),
       },
+      /** ADMIN-only: this alta creates ADMIN accounts directly, see user-create.ts. */
       {
         path: 'admin/usuarios/nuevo',
         canActivate: [roleGuard(['ADMIN'])],
@@ -114,17 +115,17 @@ export const routes: Routes = [
       },
       {
         path: 'admin/usuarios/:id/rol',
-        canActivate: [roleGuard(['ADMIN'])],
+        canActivate: [roleGuard(['ADMIN', 'GESTOR'])],
         loadComponent: () => import('./features/admin/user-role/user-role').then((m) => m.UserRole),
       },
       {
         path: 'admin/usuarios/:id/eliminar',
-        canActivate: [roleGuard(['ADMIN'])],
+        canActivate: [roleGuard(['ADMIN', 'GESTOR'])],
         loadComponent: () => import('./features/admin/user-delete/user-delete').then((m) => m.UserDelete),
       },
       {
         path: 'admin/whitelist',
-        canActivate: [roleGuard(['ADMIN'])],
+        canActivate: [roleGuard(['ADMIN', 'GESTOR'])],
         loadComponent: () => import('./features/admin/whitelist/whitelist-admin').then((m) => m.WhitelistAdmin),
       },
       {

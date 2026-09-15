@@ -106,7 +106,7 @@ import { ToastService } from '../../../core/services/toast.service';
               >Solicitar whitelist</a
             >
           }
-          @if (isAdmin()) {
+          @if (isAdmin() || isGestor()) {
             <p class="fu-nav-section">Administración</p>
             <a routerLink="/admin/usuarios" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)">Usuarios</a>
             <a routerLink="/admin/whitelist" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)"
@@ -172,6 +172,7 @@ export class AppShell {
 
   protected readonly sidebarOpen = signal(false);
   protected readonly isAdmin = computed(() => this.tokenStore.isAdmin());
+  protected readonly isGestor = computed(() => this.tokenStore.roles().includes('GESTOR'));
   protected readonly isProfessor = computed(() => this.tokenStore.roles().includes('PROFESSOR'));
   protected readonly me = toSignal(this.authService.me().pipe(catchError(() => of(null))), { initialValue: null });
   protected readonly initials = computed(() => {

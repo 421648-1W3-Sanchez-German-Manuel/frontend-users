@@ -6,7 +6,7 @@
     <p class="text-sm mb-6" style="color: var(--color-text-muted)">Elegí el nuevo conjunto de roles para este usuario.</p>
 
     <div class="flex gap-2 flex-wrap mb-6">
-      @for (role of allRoles; track role) {
+      @for (role of allRoles(); track role) {
         <button
           type="button"
           class="fu-badge"

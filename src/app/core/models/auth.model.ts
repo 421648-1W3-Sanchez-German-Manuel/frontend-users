@@ -1,4 +1,4 @@
-export type Role = 'STUDENT' | 'PROFESSOR' | 'ADMIN';
+export type Role = 'STUDENT' | 'PROFESSOR' | 'GESTOR' | 'ADMIN';
 export type AccountStatus = 'PENDING_COURSE' | 'ACTIVE' | 'SUSPENDED' | string;
 
 export interface AccessTokenClaims {
@@ -52,6 +52,14 @@ export interface StudentRegistrationRequest {
 }
 
 export interface ProfessorRegistrationRequest {
+  firstNames: string;
+  lastNames: string;
+  email: string;
+  password: string;
+  termsVersion: string;
+}
+
+export interface GestorRegistrationRequest {
   firstNames: string;
   lastNames: string;
   email: string;

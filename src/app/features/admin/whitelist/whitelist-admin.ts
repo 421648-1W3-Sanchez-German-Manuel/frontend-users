@@ -4,7 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 import { AdminService } from '../../../core/services/admin.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { ReviewWhitelistRequest, WhitelistEntry, WhitelistRequest } from '../../../core/models/admin.model';
+import {
+  ReviewWhitelistRequest,
+  WhitelistableRole,
+  WhitelistEntry,
+  WhitelistRequest,
+} from '../../../core/models/admin.model';
 import { Spinner } from '../../../shared/ui/spinner/spinner';
 import { FuButton } from '../../../shared/ui/button/button';
 
@@ -23,6 +28,7 @@ export class WhitelistAdmin {
   protected readonly processingId = signal<string | null>(null);
   protected readonly rejectionReasons = signal<Record<string, string>>({});
   protected readonly directEmail = signal('');
+  protected readonly directRole = signal<WhitelistableRole>('PROFESSOR');
   protected readonly adding = signal(false);
   protected readonly entries = signal<WhitelistEntry[] | null | undefined>(undefined);
   protected readonly removingId = signal<string | null>(null);
@@ -43,7 +49,7 @@ export class WhitelistAdmin {
     }
     if (this.adding()) return;
     this.adding.set(true);
-    this.adminService.addEmailToWhitelist({ email: value }).subscribe({
+    this.adminService.addEmailToWhitelist({ email: value, role: this.directRole() }).subscribe({
       next: () => {
         this.adding.set(false);
         this.directEmail.set('');
