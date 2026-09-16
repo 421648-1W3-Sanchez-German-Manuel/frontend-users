@@ -1,5 +1,9 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { MeResponse, Role, SessionClaims } from '../models/auth.model';
+
+const BROADCAST_CHANNEL_NAME = 'fu-auth';
+const SESSION_CLEARED = 'session-cleared';
 
 function claimsDeMe(me: MeResponse): SessionClaims {
   return {
@@ -26,9 +30,19 @@ function claimsDeMe(me: MeResponse): SessionClaims {
  * — el backend es quien realmente lo aplica en cada request. patchClaims()
  * sigue existiendo para el mismo atajo optimista de siempre: reflejar en la
  * UI que el onboarding terminó sin esperar un round-trip.
+ *
+ * Al no haber más localStorage no hay evento `storage` que sincronice
+ * pestañas: sin esto, cerrar sesión en la pestaña A deja a la B mostrando la
+ * UI de logueado hasta que dispare un request y le vuelva 401. clear() avisa
+ * por BroadcastChannel a las demás pestañas del mismo origen para que se
+ * enteren en el acto — ver clearRemota().
  */
 @Injectable({ providedIn: 'root' })
 export class TokenStoreService {
+  private readonly router = inject(Router);
+  private readonly channel =
+    typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(BROADCAST_CHANNEL_NAME) : null;
+
   private readonly _claims = signal<SessionClaims | null>(null);
   private readonly _authenticated = signal(false);
 
@@ -41,6 +55,12 @@ export class TokenStoreService {
   readonly mustChangePassword = computed(() => this._claims()?.pwd ?? false);
   readonly onboardingPending = computed(() => this._claims()?.onb ?? false);
   readonly userId = computed(() => this._claims()?.sub ?? null);
+
+  constructor() {
+    this.channel?.addEventListener('message', (event: MessageEvent) => {
+      if (event.data === SESSION_CLEARED) this.clearRemota();
+    });
+  }
 
   /** Tras login, refresh, o el bootstrap de la app: puebla la sesión desde /me. */
   setFromMe(me: MeResponse): void {
@@ -68,8 +88,27 @@ export class TokenStoreService {
     }
   }
 
+  /**
+   * Todo caller de clear() (logout, interceptor ante session-closed/
+   * -superseded/not-authenticated, reLogin desde cuenta-pendiente, el
+   * cambio de contraseña) ya navega a /login por su cuenta en SU pestaña —
+   * ver app-shell.logout(), auth.interceptor.ts, account-pending.ts,
+   * change-password.ts. Por eso clear() no navega: solo avisa a las demás
+   * pestañas, y es clearRemota() quien lo hace por ellas.
+   */
   clear(): void {
     this._claims.set(null);
     this._authenticated.set(false);
+    this.channel?.postMessage(SESSION_CLEARED);
+  }
+
+  /** Reacciona al aviso de otra pestaña: limpia el estado local y, a diferencia
+   * de clear(), navega — acá no hubo ningún request que la hubiera mandado ya. */
+  private clearRemota(): void {
+    this._claims.set(null);
+    this._authenticated.set(false);
+    if (!this.router.url.startsWith('/login')) {
+      this.router.navigate(['/login'], { queryParams: { motivo: 'session-closed' } });
+    }
   }
 }
