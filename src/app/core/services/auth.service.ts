@@ -1,6 +1,18 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpContext } from '@angular/common/http';
-import { Observable, catchError, finalize, map, of, shareReplay, switchMap, tap } from 'rxjs';
+import {
+  Observable,
+  catchError,
+  defer,
+  finalize,
+  firstValueFrom,
+  from,
+  map,
+  of,
+  shareReplay,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { API } from '../config/api.config';
 import { SILENT_AUTH_CHECK } from '../interceptors/auth.interceptor';
 import { ApiError } from '../models/problem-details.model';
@@ -27,6 +39,9 @@ import {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly tokenStore = inject(TokenStoreService);
+
+  /** Nombre de la Web Lock que serializa refresh() entre pestañas — ver postRefresh(). */
+  private static readonly REFRESH_LOCK = 'fu-auth-refresh';
 
   private refreshInFlight$: Observable<SessionResponse> | null = null;
   private silentRefreshTimer: ReturnType<typeof setTimeout> | null = null;
@@ -61,7 +76,7 @@ export class AuthService {
     }
     // Sin body: fu_rt viaja sola, como cookie — el navegador la adjunta.
     const context = new HttpContext().set(SILENT_AUTH_CHECK, opts.silent ?? false);
-    this.refreshInFlight$ = this.http.post<SessionResponse>(API.refresh, {}, { context }).pipe(
+    this.refreshInFlight$ = this.postRefresh(context).pipe(
       tap((session) => this.scheduleSilentRefresh(session.expiresIn)),
       switchMap((session) => this.pobladoDeClaims(session)),
       shareReplay(1),
@@ -70,6 +85,38 @@ export class AuthService {
       })
     );
     return this.refreshInFlight$;
+  }
+
+  /**
+   * refreshInFlight$ es de instancia — una por pestaña — así que no evita
+   * que dos pestañas manden POST /auth/refresh con la misma fu_rt a la vez
+   * (dos F5, o dos tabs abriéndose juntas tras restoreSession()). El backend
+   * rota el jti en cada refresh y revoca la familia ENTERA ante un reuse
+   * (AuthService.refrescar en users), así que esa carrera expulsa a todas
+   * las pestañas sin que nadie hiciera nada raro.
+   *
+   * navigator.locks.request serializa el POST entre pestañas del mismo
+   * origen: la primera lo manda, las demás esperan su turno. Para cuando les
+   * toca, el navegador ya tiene la fu_rt rotada por la anterior — su POST
+   * usa el jti vigente, no el que acaba de quedar marcado como rotado.
+   */
+  private postRefresh(context: HttpContext): Observable<SessionResponse> {
+    const request = () => this.http.post<SessionResponse>(API.refresh, {}, { context });
+    if (typeof navigator === 'undefined' || !navigator.locks) {
+      return request();
+    }
+    // lib.dom tipa LockGrantedCallback<T> como (lock) => T, sin el
+    // PromiseLike<T> que sí permite el spec real (LockManager espera a que
+    // resuelva la promise devuelta antes de liberar el lock): T se infiere
+    // como Promise<SessionResponse>, de ahí el cast — el runtime desenvuelve
+    // la promise igual.
+    return defer(() =>
+      from(
+        navigator.locks.request(AuthService.REFRESH_LOCK, () =>
+          firstValueFrom(request())
+        ) as unknown as Promise<SessionResponse>
+      )
+    );
   }
 
   /**
