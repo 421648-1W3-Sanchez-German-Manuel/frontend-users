@@ -37,8 +37,16 @@ export class AccountPending {
     });
   }
 
+  /**
+   * Vuelve a /login matando primero la sesion en el servidor. Sin el logout,
+   * la sesion vieja (S1) queda viva en Redis: cuando el proximo login emite
+   * S2, cualquier request demorado con S1 contesta session-superseded y su
+   * broadcast voltea hasta la pestana con la sesion vigente.
+   */
   reLogin(): void {
-    this.authService.clearLocalSession();
-    this.router.navigateByUrl('/login');
+    this.authService.logout().subscribe({
+      next: () => this.router.navigateByUrl('/login'),
+      error: () => this.router.navigateByUrl('/login'),
+    });
   }
 }
