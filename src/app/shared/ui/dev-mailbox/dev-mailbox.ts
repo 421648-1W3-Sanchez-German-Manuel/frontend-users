@@ -1,29 +1,29 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, Signal, computed, signal } from '@angular/core';
 import { TokenStoreService } from '../../../core/services/token-store.service';
 
-/** Un mail ya masticado por el buzon: o trae codigo, o trae enlace. */
+/** A mail already chewed up by the mailbox: it either carries a code, or a link. */
 interface MailDev {
   id: string;
-  para: string | null;
-  asunto: string | null;
-  tipo: string | null;
-  fecha: string;
-  codigo: string | null;
-  enlace: string | null;
+  to: string | null;
+  subject: string | null;
+  type: string | null;
+  date: string;
+  code: string | null;
+  link: string | null;
 }
 
 /**
- * Una llamada que el Gateway enruto a un micro. La escribe el filtro
- * InterMicroTraceFilter de api-gateway en Redis; aca llega via /dev/logs.
+ * A call the Gateway routed to a micro. Written by api-gateway's
+ * InterMicroTraceFilter into Redis; arrives here via /dev/logs.
  */
-interface Traza {
+interface Trace {
   ts: string;
   requestId: string;
   traceId: string;
-  origen: 'PERSON' | 'MS' | 'ANON';
+  origin: 'PERSON' | 'MS' | 'ANON';
   actor?: string;
-  destino: string;
-  metodo: string;
+  destination: string;
+  method: string;
   path: string;
   status: number;
   ms: number;
@@ -31,35 +31,35 @@ interface Traza {
 
 const ENDPOINT = '/dev/mailbox';
 const ENDPOINT_LOGS = '/dev/logs';
-const REFRESCO_MS = 5000;
+const REFRESH_MS = 5000;
 
 /**
- * Buzon flotante de desarrollo.
+ * Floating development mailbox.
  *
- * No hay servidor de mail en el stack: los codigos de 2FA y los enlaces de
- * activacion y de reset quedan en la tabla `outbox_events`. Sin esto, seguir
- * cualquier flujo a mano exige un `docker compose exec mysql` con un SELECT y
- * un grep, que es exactamente la friccion que hace que nadie pruebe los flujos.
+ * There is no mail server in the stack: 2FA codes and activation/reset links
+ * sit in the `outbox_events` table. Without this, following any flow by hand
+ * requires a `docker compose exec mysql` with a SELECT and a grep, which is
+ * exactly the friction that keeps anyone from testing the flows.
  *
- * Ademas de los mails trae la pestana Logs: la traza micro-a-micro que deja el
- * Gateway en Redis, con un boton que dispara el round-trip de echo-service
- * (echo -> gateway -> users) para verla aparecer en vivo.
+ * Besides the mails it also has the Logs tab: the micro-to-micro trace the
+ * Gateway leaves in Redis, with a button that fires the echo-service
+ * round-trip (echo -> gateway -> users) to watch it appear live.
  *
- * ⛔ Es una herramienta de DESARROLLO y muestra codigos de cualquier cuenta.
+ * ⛔ It is a DEVELOPMENT tool and shows codes for any account.
  *
- * Por eso no se dibuja solo porque si: pregunta por `/dev/mailbox` y si no
- * contesta -que es lo que pasa en cualquier despliegue que no tenga el
- * contenedor `dev-mailbox`- el boton nunca aparece. Deteccion por capacidad y
- * no una bandera de build: una bandera hay que acordarse de apagarla.
+ * That's why it doesn't just render unconditionally: it asks `/dev/mailbox`
+ * and if it doesn't answer — which is what happens in any deployment without
+ * the `dev-mailbox` container — the button never shows up. Detection by
+ * capability, not a build flag: a flag has to be remembered and turned off.
  */
 @Component({
   selector: 'fu-dev-mailbox',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @if (disponible()) {
+    @if (available()) {
       <div class="fixed bottom-4 right-4 z-[90] flex flex-col items-end gap-2">
-        @if (abierto()) {
+        @if (open()) {
           <section
             class="fu-card !p-0 w-[min(26rem,calc(100vw-2rem))] max-h-[min(36rem,78vh)] flex flex-col overflow-hidden"
             style="animation: fu-pop-in 0.15s ease-out"
@@ -79,7 +79,7 @@ const REFRESCO_MS = 5000;
               <button
                 type="button"
                 class="text-xs opacity-60 hover:opacity-100 transition-opacity"
-                (click)="refrescar()"
+                (click)="refresh()"
                 aria-label="Actualizar"
                 title="Actualizar"
               >
@@ -88,7 +88,7 @@ const REFRESCO_MS = 5000;
               <button
                 type="button"
                 class="text-xs opacity-60 hover:opacity-100 transition-opacity"
-                (click)="abierto.set(false)"
+                (click)="open.set(false)"
                 aria-label="Cerrar buzón"
               >
                 ✕
@@ -103,48 +103,48 @@ const REFRESCO_MS = 5000;
               <button
                 type="button"
                 class="flex-1 px-3 py-1.5 text-xs transition-colors"
-                [style.color]="pestana() === 'mails' ? 'var(--color-cyan)' : 'var(--color-text-muted)'"
-                [style.border-bottom]="pestana() === 'mails' ? '2px solid var(--color-cyan)' : '2px solid transparent'"
-                (click)="cambiarPestana('mails')"
+                [style.color]="tab() === 'mails' ? 'var(--color-cyan)' : 'var(--color-text-muted)'"
+                [style.border-bottom]="tab() === 'mails' ? '2px solid var(--color-cyan)' : '2px solid transparent'"
+                (click)="changeTab('mails')"
               >
                 Mails
               </button>
               <button
                 type="button"
                 class="flex-1 px-3 py-1.5 text-xs transition-colors"
-                [style.color]="pestana() === 'logs' ? 'var(--color-cyan)' : 'var(--color-text-muted)'"
-                [style.border-bottom]="pestana() === 'logs' ? '2px solid var(--color-cyan)' : '2px solid transparent'"
-                (click)="cambiarPestana('logs')"
+                [style.color]="tab() === 'logs' ? 'var(--color-cyan)' : 'var(--color-text-muted)'"
+                [style.border-bottom]="tab() === 'logs' ? '2px solid var(--color-cyan)' : '2px solid transparent'"
+                (click)="changeTab('logs')"
               >
                 Logs
-                @if (pestana() === 'logs' && logs().length) {
+                @if (tab() === 'logs' && logs().length) {
                   <span class="fu-badge fu-badge--primary ml-1">{{ logs().length }}</span>
                 }
               </button>
             </nav>
 
-            @if (pestana() === 'mails') {
-              @if (pendientes().length) {
+            @if (tab() === 'mails') {
+              @if (pending().length) {
                 <div class="px-3 py-2 shrink-0" style="border-bottom: 1px solid var(--color-border)">
                   <p class="text-xs mb-1.5" style="color: var(--color-text-muted)">
                     Esperando el padrón de Cursos
                   </p>
-                  @for (p of pendientes(); track p.id) {
+                  @for (p of pending(); track p.id) {
                     <div class="flex items-center gap-2 mb-1">
                       <span class="text-xs truncate flex-1" style="color: var(--color-text)">{{ p.email }}</span>
                       <button
                         type="button"
                         class="fu-btn fu-btn--sm fu-btn--secondary shrink-0"
-                        [disabled]="resolviendo() === p.email"
-                        (click)="resolverPadron(p.email)"
+                        [disabled]="resolving() === p.email"
+                        (click)="resolvePadron(p.email)"
                       >
-                        {{ resolviendo() === p.email ? '...' : 'resolver padrón' }}
+                        {{ resolving() === p.email ? '...' : 'resolver padrón' }}
                       </button>
                     </div>
                   }
-                  @if (avisoPadron()) {
-                    <p class="text-xs mt-1" [style.color]="avisoOk() ? 'var(--color-success)' : 'var(--color-danger)'">
-                      {{ avisoPadron() }}
+                  @if (padronNotice()) {
+                    <p class="text-xs mt-1" [style.color]="padronNoticeOk() ? 'var(--color-success)' : 'var(--color-danger)'">
+                      {{ padronNotice() }}
                     </p>
                   }
                 </div>
@@ -155,8 +155,8 @@ const REFRESCO_MS = 5000;
                   class="fu-input !py-1 text-xs"
                   type="search"
                   placeholder="Filtrar por email"
-                  [value]="filtro()"
-                  (input)="alFiltrar($event)"
+                  [value]="filter()"
+                  (input)="onFilter($event)"
                   aria-label="Filtrar por email"
                 />
               </div>
@@ -164,38 +164,38 @@ const REFRESCO_MS = 5000;
               <div class="overflow-y-auto flex-1">
                 @if (error()) {
                   <p class="p-4 text-xs" style="color: var(--color-danger)">{{ error() }}</p>
-                } @else if (visibles().length === 0) {
+                } @else if (visible().length === 0) {
                   <p class="p-4 text-xs" style="color: var(--color-text-muted)">
                     Nada todavía. Registrate o pedí un código y aparece acá.
                   </p>
                 } @else {
                   <ul>
-                    @for (mail of visibles(); track mail.id) {
+                    @for (mail of visible(); track mail.id) {
                       <li class="px-3 py-2" style="border-bottom: 1px solid var(--color-border)">
                         <div class="flex items-baseline gap-2">
-                          <span class="text-xs truncate flex-1" style="color: var(--color-text)">{{ mail.para }}</span>
-                          <span class="text-xs shrink-0" style="color: var(--color-text-faint)">{{ hora(mail.fecha) }}</span>
+                          <span class="text-xs truncate flex-1" style="color: var(--color-text)">{{ mail.to }}</span>
+                          <span class="text-xs shrink-0" style="color: var(--color-text-faint)">{{ time(mail.date) }}</span>
                         </div>
-                        <p class="text-xs mt-0.5" style="color: var(--color-text-faint)">{{ etiqueta(mail.tipo) }}</p>
+                        <p class="text-xs mt-0.5" style="color: var(--color-text-faint)">{{ typeLabel(mail.type) }}</p>
 
-                        @if (mail.codigo) {
+                        @if (mail.code) {
                           <div class="mt-1.5 flex items-center gap-2">
-                            <code class="text-base tracking-[0.3em]" style="color: var(--color-cyan)">{{ mail.codigo }}</code>
-                            <button type="button" class="fu-btn fu-btn--sm fu-btn--ghost" (click)="copiar(mail.codigo!, mail.id)">
-                              {{ copiado() === mail.id ? '✓ copiado' : 'copiar' }}
+                            <code class="text-base tracking-[0.3em]" style="color: var(--color-cyan)">{{ mail.code }}</code>
+                            <button type="button" class="fu-btn fu-btn--sm fu-btn--ghost" (click)="copy(mail.code!, mail.id)">
+                              {{ copied() === mail.id ? '✓ copiado' : 'copiar' }}
                             </button>
                           </div>
                         }
 
-                        @if (mail.enlace) {
+                        @if (mail.link) {
                           <div class="mt-1.5 flex items-center gap-2">
                             <a
                               class="text-xs truncate flex-1 underline"
                               style="color: var(--color-cyan)"
-                              [href]="mail.enlace"
-                            >{{ mail.enlace }}</a>
-                            <button type="button" class="fu-btn fu-btn--sm fu-btn--ghost" (click)="copiar(mail.enlace!, mail.id)">
-                              {{ copiado() === mail.id ? '✓' : 'copiar' }}
+                              [href]="mail.link"
+                            >{{ mail.link }}</a>
+                            <button type="button" class="fu-btn fu-btn--sm fu-btn--ghost" (click)="copy(mail.link!, mail.id)">
+                              {{ copied() === mail.id ? '✓' : 'copiar' }}
                             </button>
                           </div>
                         }
@@ -212,20 +212,20 @@ const REFRESCO_MS = 5000;
                 <button
                   type="button"
                   class="fu-btn fu-btn--sm fu-btn--secondary w-full"
-                  [disabled]="!autenticado() || disparando()"
-                  (click)="probarFlujo()"
+                  [disabled]="!authenticated() || triggering()"
+                  (click)="testFlow()"
                   title="echo-service pide un token de servicio y llama a users-service a través del Gateway"
                 >
-                  {{ disparando() ? 'disparando…' : 'probar flujo micro → micro' }}
+                  {{ triggering() ? 'disparando…' : 'probar flujo micro → micro' }}
                 </button>
-                @if (!autenticado()) {
+                @if (!authenticated()) {
                   <p class="text-xs mt-1" style="color: var(--color-text-faint)">
                     Logueate para que echo llame a users con tu usuario.
                   </p>
                 }
-                @if (avisoFlujo()) {
-                  <p class="text-xs mt-1" [style.color]="avisoFlujoOk() ? 'var(--color-success)' : 'var(--color-danger)'">
-                    {{ avisoFlujo() }}
+                @if (flowNotice()) {
+                  <p class="text-xs mt-1" [style.color]="flowNoticeOk() ? 'var(--color-success)' : 'var(--color-danger)'">
+                    {{ flowNotice() }}
                   </p>
                 }
               </div>
@@ -242,14 +242,14 @@ const REFRESCO_MS = 5000;
                     @for (log of logs(); track log.requestId) {
                       <li class="px-3 py-2" style="border-bottom: 1px solid var(--color-border)">
                         <div class="flex items-baseline gap-2">
-                          <span class="fu-badge text-[10px] shrink-0" [style.background-color]="colorOrigen(log.origen)">
-                            {{ log.origen }}
+                          <span class="fu-badge text-[10px] shrink-0" [style.background-color]="colorOrigin(log.origin)">
+                            {{ log.origin }}
                           </span>
-                          <span class="text-xs truncate flex-1" style="color: var(--color-text)">{{ log.destino }}</span>
-                          <span class="text-xs shrink-0" style="color: var(--color-text-faint)">{{ hora(log.ts) }}</span>
+                          <span class="text-xs truncate flex-1" style="color: var(--color-text)">{{ log.destination }}</span>
+                          <span class="text-xs shrink-0" style="color: var(--color-text-faint)">{{ time(log.ts) }}</span>
                         </div>
                         <p class="text-xs mt-0.5 truncate" style="color: var(--color-text-faint)">
-                          {{ log.metodo }} {{ log.path }}
+                          {{ log.method }} {{ log.path }}
                         </p>
                         <p class="text-xs mt-0.5 flex items-center gap-2">
                           <span [style.color]="colorStatus(log.status)">{{ log.status }}</span>
@@ -270,12 +270,12 @@ const REFRESCO_MS = 5000;
         <button
           type="button"
           class="fu-btn fu-btn--sm fu-btn--secondary shadow-[var(--shadow-lg)]"
-          (click)="abierto.set(!abierto())"
-          [attr.aria-expanded]="abierto()"
+          (click)="open.set(!open())"
+          [attr.aria-expanded]="open()"
           aria-label="Buzón de desarrollo"
         >
           📬 Buzón
-          @if (!abierto() && mails().length) {
+          @if (!open() && mails().length) {
             <span class="fu-badge fu-badge--primary ml-1">{{ mails().length }}</span>
           }
         </button>
@@ -284,120 +284,120 @@ const REFRESCO_MS = 5000;
   `,
 })
 export class DevMailbox implements OnDestroy {
-  protected readonly disponible = signal(false);
-  protected readonly abierto = signal(false);
-  protected readonly pestana = signal<'mails' | 'logs'>('mails');
+  protected readonly available = signal(false);
+  protected readonly open = signal(false);
+  protected readonly tab = signal<'mails' | 'logs'>('mails');
   protected readonly mails = signal<MailDev[]>([]);
-  protected readonly logs = signal<Traza[]>([]);
-  protected readonly filtro = signal('');
+  protected readonly logs = signal<Trace[]>([]);
+  protected readonly filter = signal('');
   protected readonly error = signal<string | null>(null);
   protected readonly errorLogs = signal<string | null>(null);
-  protected readonly copiado = signal<string | null>(null);
-  protected readonly pendientes = signal<{ id: string; email: string }[]>([]);
-  protected readonly resolviendo = signal<string | null>(null);
-  protected readonly avisoPadron = signal<string | null>(null);
-  protected readonly avisoOk = signal(false);
-  protected readonly disparando = signal(false);
-  protected readonly avisoFlujo = signal<string | null>(null);
-  protected readonly avisoFlujoOk = signal(false);
+  protected readonly copied = signal<string | null>(null);
+  protected readonly pending = signal<{ id: string; email: string }[]>([]);
+  protected readonly resolving = signal<string | null>(null);
+  protected readonly padronNotice = signal<string | null>(null);
+  protected readonly padronNoticeOk = signal(false);
+  protected readonly triggering = signal(false);
+  protected readonly flowNotice = signal<string | null>(null);
+  protected readonly flowNoticeOk = signal(false);
 
-  protected readonly autenticado: Signal<boolean>;
+  protected readonly authenticated: Signal<boolean>;
 
-  protected readonly visibles = computed(() => {
-    const f = this.filtro().trim().toLowerCase();
-    return f ? this.mails().filter((m) => m.para?.toLowerCase().includes(f)) : this.mails();
+  protected readonly visible = computed(() => {
+    const f = this.filter().trim().toLowerCase();
+    return f ? this.mails().filter((m) => m.to?.toLowerCase().includes(f)) : this.mails();
   });
 
   private timer?: ReturnType<typeof setInterval>;
 
   constructor(private readonly tokenStore: TokenStoreService) {
-    this.autenticado = tokenStore.isAuthenticated;
-    // Una sola consulta al arrancar decide si el buzon existe en este entorno.
-    // Si falla, el componente no vuelve a intentar y no deja rastro en la UI.
-    void this.cargar(true);
+    this.authenticated = tokenStore.isAuthenticated;
+    // A single call on startup decides whether the mailbox exists in this
+    // environment. If it fails, the component never retries and leaves no trace in the UI.
+    void this.load(true);
   }
 
   ngOnDestroy(): void {
-    this.detener();
+    this.stop();
   }
 
-  protected refrescar(): void {
-    void this.cargar(false);
+  protected refresh(): void {
+    void this.load(false);
   }
 
-  protected cambiarPestana(p: 'mails' | 'logs'): void {
-    this.pestana.set(p);
-    if (p === 'logs') void this.cargarLogs();
+  protected changeTab(t: 'mails' | 'logs'): void {
+    this.tab.set(t);
+    if (t === 'logs') void this.loadLogs();
   }
 
-  protected alFiltrar(evento: Event): void {
-    this.filtro.set((evento.target as HTMLInputElement).value);
+  protected onFilter(event: Event): void {
+    this.filter.set((event.target as HTMLInputElement).value);
   }
 
-  protected async copiar(texto: string, id: string): Promise<void> {
+  protected async copy(text: string, id: string): Promise<void> {
     try {
-      await navigator.clipboard.writeText(texto);
-      this.copiado.set(id);
-      setTimeout(() => this.copiado.set(null), 1200);
+      await navigator.clipboard.writeText(text);
+      this.copied.set(id);
+      setTimeout(() => this.copied.set(null), 1200);
     } catch {
-      // Sin permiso de portapapeles (pasa fuera de https): el texto igual se ve
-      // en pantalla y se puede seleccionar a mano. No vale un error en la UI.
+      // No clipboard permission (happens outside https): the text is still
+      // visible on screen and can be selected by hand. Not worth an error in the UI.
     }
   }
 
   /**
-   * Dispara el round-trip micro-a-micro de echo-service: la persona pega
-   * /api/echo/cliente/perfil/{id}, y echo pide su token de servicio y llama a
-   * users-service por el Gateway. El resultado son TRES entradas en la traza
-   * (persona→echo, echo→users/token, echo→users/perfil) que el Gateway ya
-   * está registrando en Redis.
+   * Fires the echo-service micro-to-micro round-trip: the person hits
+   * /api/echo/cliente/perfil/{id}, and echo requests its service token and calls
+   * users-service through the Gateway. The result is THREE entries in the trace
+   * (person→echo, echo→users/token, echo→users/perfil) that the Gateway is
+   * already recording in Redis.
    */
-  protected async probarFlujo(): Promise<void> {
+  protected async testFlow(): Promise<void> {
     const id = this.tokenStore.userId();
     if (!id) return;
 
-    this.disparando.set(true);
-    this.avisoFlujo.set(null);
+    this.triggering.set(true);
+    this.flowNotice.set(null);
     try {
-      // Sin Authorization a mano: fu_at es HttpOnly, el navegador la manda
-      // sola en este fetch same-origin. El Gateway ya la acepta (converter).
+      // No manual Authorization header: fu_at is HttpOnly, the browser sends
+      // it on its own on this same-origin fetch. The Gateway already accepts it (converter).
       const res = await fetch(`/api/echo/cliente/perfil/${id}`);
-      const cuerpo = await res.json();
-      this.avisoFlujoOk.set(res.ok);
-      this.avisoFlujo.set(
+      const body = await res.json();
+      this.flowNoticeOk.set(res.ok);
+      this.flowNotice.set(
         res.ok
           ? 'Echo pidió su token y llamó a users por el Gateway. Mirá las tres entradas en los logs.'
-          : (cuerpo?.detail ?? cuerpo?.error ?? `Falló con status ${res.status}.`)
+          : (body?.detail ?? body?.error ?? `Falló con status ${res.status}.`)
       );
     } catch {
-      this.avisoFlujoOk.set(false);
-      this.avisoFlujo.set('El flujo no respondió.');
+      this.flowNoticeOk.set(false);
+      this.flowNotice.set('El flujo no respondió.');
     } finally {
-      // La escritura de la traza en Redis es fire-and-forget en el Gateway:
-      // puede aterrizar justo despues de la respuesta. Esperar a que el
-      // round-trip aparezca en la lista en vez de prometer "se refresca solo".
-      await this.esperarTraza(id);
-      this.disparando.set(false);
+      // The trace write to Redis is fire-and-forget in the Gateway: it can land
+      // right after the response. Wait for the round-trip to show up in the
+      // list instead of promising "it refreshes itself".
+      await this.waitForTrace(id);
+      this.triggering.set(false);
     }
   }
 
   /**
-   * Tras probarFlujo, la entrada mas nueva (indice 0) tiene que ser la llamada
-   * de la persona a echo-service. Se intenta hasta que aparezca.
+   * After testFlow, the newest entry (index 0) has to be the person's call to
+   * echo-service. Retries until it shows up.
    */
-  private async esperarTraza(id: string): Promise<void> {
-    for (let intento = 0; intento < 7; intento++) {
+  private async waitForTrace(id: string): Promise<void> {
+    for (let attempt = 0; attempt < 7; attempt++) {
       await new Promise((r) => setTimeout(r, 250));
-      await this.cargarLogs();
-      const primera = this.logs()[0];
-      if (primera?.destino === 'echo-service' && primera.path === `/api/echo/cliente/perfil/${id}`) return;
+      await this.loadLogs();
+      const first = this.logs()[0];
+      if (first?.destination === 'echo-service' && first.path === `/api/echo/cliente/perfil/${id}`) return;
       if (this.errorLogs()) return;
     }
   }
 
-  /** Badge con color: cyan persona, verde servicio, gris anónimo/indefinido. */
-  protected colorOrigen(origen: Traza['origen']): string {
-    return { PERSON: 'rgba(34,211,238,0.18)', MS: 'rgba(74,222,128,0.18)', ANON: 'rgba(148,163,184,0.18)' }[origen] ?? 'rgba(148,163,184,0.18)';
+  /** Badge color: cyan for person, green for service, gray for anonymous/undefined. */
+  protected colorOrigin(origin: Trace['origin']): string {
+    return { PERSON: 'rgba(34,211,238,0.18)', MS: 'rgba(74,222,128,0.18)', ANON: 'rgba(148,163,184,0.18)' }[origin] ?? 'rgba(148,163,184,0.18)';
   }
 
   protected colorStatus(status: number): string {
@@ -407,57 +407,57 @@ export class DevMailbox implements OnDestroy {
   }
 
   /**
-   * Se hace pasar por Cursos y publica el evento de padron resuelto.
+   * Impersonates Cursos and publishes the padron-resolved event.
    *
-   * Un alumno que activa su email queda en PENDING_COURSE esperando que Cursos
-   * valide su padron, y esa validacion llega por Kafka: no hay endpoint HTTP
-   * que la dispare. Como el equipo de Cursos todavia no existe, sin esto la
-   * cuenta se queda esperando para siempre y no se puede probar nada de lo que
-   * viene despues.
+   * A student who activates their email lands in PENDING_COURSE waiting for
+   * Cursos to validate their padron, and that validation arrives over Kafka:
+   * there is no HTTP endpoint that fires it. Since the Cursos team doesn't
+   * exist yet, without this the account waits forever and nothing downstream
+   * can be tested.
    */
-  protected async resolverPadron(email: string): Promise<void> {
-    this.resolviendo.set(email);
-    this.avisoPadron.set(null);
+  protected async resolvePadron(email: string): Promise<void> {
+    this.resolving.set(email);
+    this.padronNotice.set(null);
     try {
       const res = await fetch('/dev/resolver-padron', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
-      const cuerpo = await res.json();
-      this.avisoOk.set(res.ok);
-      this.avisoPadron.set(
+      const body = await res.json();
+      this.padronNoticeOk.set(res.ok);
+      this.padronNotice.set(
         res.ok
-          ? `${email} quedó ${cuerpo.a}. Volvé a loguearte: el token viejo sigue diciendo PENDING_COURSE.`
-          : (cuerpo.error ?? 'No se pudo resolver.')
+          ? `${email} quedó ${body.a}. Volvé a loguearte: el token viejo sigue diciendo PENDING_COURSE.`
+          : (body.error ?? 'No se pudo resolver.')
       );
-      await this.cargar(false);
+      await this.load(false);
     } catch {
-      this.avisoOk.set(false);
-      this.avisoPadron.set('El buzón no responde.');
+      this.padronNoticeOk.set(false);
+      this.padronNotice.set('El buzón no responde.');
     } finally {
-      this.resolviendo.set(null);
+      this.resolving.set(null);
     }
   }
 
-  protected hora(fecha: string): string {
-    const d = new Date(fecha);
+  protected time(date: string): string {
+    const d = new Date(date);
     return Number.isNaN(d.getTime()) ? '' : d.toLocaleTimeString('es-AR', { hour12: false });
   }
 
-  /** Los eventType del backend, en algo que se lea de un vistazo. */
-  protected etiqueta(tipo: string | null): string {
+  /** The backend's eventType values, turned into something readable at a glance. */
+  protected typeLabel(type: string | null): string {
     return (
       {
         EMAIL_2FA: 'Código de acceso',
         EMAIL_ACTIVACION_CUENTA: 'Activación de cuenta',
         EMAIL_RESET_PASSWORD: 'Recuperar contraseña',
         WHITELISTING_RESOLVED: 'Padrón resuelto',
-      }[tipo ?? ''] ?? (tipo ?? 'Mail')
+      }[type ?? ''] ?? (type ?? 'Mail')
     );
   }
 
-  private async cargar(primera: boolean): Promise<void> {
+  private async load(first: boolean): Promise<void> {
     try {
       const res = await fetch(`${ENDPOINT}?limit=20`, { headers: { Accept: 'application/json' } });
       if (!res.ok) throw new Error(String(res.status));
@@ -465,54 +465,53 @@ export class DevMailbox implements OnDestroy {
       this.mails.set(await res.json());
       this.error.set(null);
 
-      // Las cuentas trabadas van en el mismo refresco: si el buzon anda, esto
-      // anda. Un fallo aca no puede tirar abajo la lista de mails, que es lo
-      // que uno vino a ver.
+      // Pending accounts ride along on the same refresh: if the mailbox works,
+      // this works. A failure here can't take down the mail list, which is what
+      // someone actually came to see.
       try {
         const p = await fetch('/dev/pendientes', { headers: { Accept: 'application/json' } });
-        if (p.ok) this.pendientes.set(await p.json());
+        if (p.ok) this.pending.set(await p.json());
       } catch {
-        /* el buzon sin /dev/pendientes sigue sirviendo para ver mails */
+        /* a mailbox without /dev/pendientes still works for viewing mails */
       }
 
-      if (primera) {
-        this.disponible.set(true);
-        // Recien ahora se empieza a consultar en bucle: en un entorno sin buzon
-        // no queda un intervalo pegandole a un 404 para siempre.
+      if (first) {
+        this.available.set(true);
+        // Only now does it start polling in a loop: in an environment without
+        // a mailbox there's no interval hammering a 404 forever.
         this.timer = setInterval(() => {
-          if (this.abierto()) {
-            void this.cargar(false);
-            if (this.pestana() === 'logs') void this.cargarLogs();
+          if (this.open()) {
+            void this.load(false);
+            if (this.tab() === 'logs') void this.loadLogs();
           }
-        }, REFRESCO_MS);
+        }, REFRESH_MS);
       }
     } catch {
-      if (primera) {
-        // No hay buzon en este entorno. Es lo esperado en cualquier despliegue
-        // real, asi que no se loguea ni se muestra nada.
-        this.disponible.set(false);
+      if (first) {
+        // No mailbox in this environment. Expected in any real deployment, so
+        // nothing is logged or shown.
+        this.available.set(false);
         return;
       }
       this.error.set('El buzón no responde. ¿Está levantado el contenedor dev-mailbox?');
     }
   }
 
-  private async cargarLogs(): Promise<void> {
+  private async loadLogs(): Promise<void> {
     try {
       const res = await fetch(`${ENDPOINT_LOGS}?limit=50`, { headers: { Accept: 'application/json' } });
       if (!res.ok) throw new Error(String(res.status));
-      const filas = (await res.json()) as Traza[];
-      // La lista viene de la entrada MAS NUEVA a la mas vieja (Redis LPUSH al
-      // cabeza, cap 200). Se muestra en ese orden: lo que acaba de pasar arriba,
-      // sin tener que ir a buscar abajo de la lista.
-      this.logs.set(filas);
+      const rows = (await res.json()) as Trace[];
+      // The list comes NEWEST entry first (Redis LPUSH at the head, cap 200).
+      // Shown in that order: what just happened on top, no need to scroll to the bottom.
+      this.logs.set(rows);
       this.errorLogs.set(null);
     } catch {
       this.errorLogs.set('No se pudo leer la traza. ¿Está Redis arriba?');
     }
   }
 
-  private detener(): void {
+  private stop(): void {
     if (this.timer) clearInterval(this.timer);
   }
 }

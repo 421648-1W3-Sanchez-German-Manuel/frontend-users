@@ -7,7 +7,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { LoginFlowState } from '../../../core/services/login-flow-state.service';
 import { ApiError } from '../../../core/models/problem-details.model';
 
-const MOTIVO_MESSAGES: Record<string, string> = {
+const REASON_MESSAGES: Record<string, string> = {
   'session-superseded': 'Iniciaste sesión desde otro dispositivo, así que cerramos esta sesión acá.',
   'session-closed': 'Tu sesión ya no existe. Iniciá sesión de nuevo.',
   'not-authenticated': 'Necesitás iniciar sesión para continuar.',
@@ -38,8 +38,8 @@ export class Login {
   protected readonly retryAfter = signal<number | null>(null);
 
   protected readonly banner = computed(() => {
-    const motivo = new URLSearchParams(window.location.search).get('motivo');
-    return motivo ? MOTIVO_MESSAGES[motivo] ?? null : null;
+    const reason = new URLSearchParams(window.location.search).get('reason');
+    return reason ? REASON_MESSAGES[reason] ?? null : null;
   });
 
   submit(): void {

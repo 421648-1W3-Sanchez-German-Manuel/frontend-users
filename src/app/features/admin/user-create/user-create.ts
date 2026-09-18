@@ -6,8 +6,8 @@ import { ToastService } from '../../../core/services/toast.service';
 import { ApiError } from '../../../core/models/problem-details.model';
 import { FuButton } from '../../../shared/ui/button/button';
 
-/** RF-ROL-03 - este formulario da de alta solo ADMIN. PROFESSOR y STUDENT
- *  entran por whitelist + auto-registro, nunca desde acá. */
+/** RF-ROL-03 - this form only creates ADMIN accounts. PROFESSOR and STUDENT
+ *  come in through whitelist + self-registration, never from here. */
 @Component({
   selector: 'fu-user-create',
   standalone: true,

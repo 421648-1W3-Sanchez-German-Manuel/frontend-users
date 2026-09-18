@@ -5,7 +5,7 @@ import { MeResponse, Role, SessionClaims } from '../models/auth.model';
 const BROADCAST_CHANNEL_NAME = 'fu-auth';
 const SESSION_CLEARED = 'session-cleared';
 
-function claimsDeMe(me: MeResponse): SessionClaims {
+function claimsFromMe(me: MeResponse): SessionClaims {
   return {
     sub: me.id,
     roles: [me.role],
@@ -16,26 +16,26 @@ function claimsDeMe(me: MeResponse): SessionClaims {
 }
 
 /**
- * Estado de sesión en memoria — nunca persistido. Los tokens viajan en
- * cookies HttpOnly (fu_at/fu_rt): el navegador los adjunta solo en cada
- * request y JS no puede leerlos, escribirlos ni borrarlos. No hay nada que
- * guardar acá ni ningún JWT que decodificar.
+ * In-memory session state — never persisted. Tokens travel in HttpOnly
+ * cookies (fu_at/fu_rt): the browser attaches them on every request and JS
+ * can't read, write or delete them. There's nothing to store here and no JWT
+ * to decode.
  *
- * Consecuencia: al recargar la página no hay forma sincrónica de saber si
- * hay sesión — hay que preguntarle al servidor (GET /api/users/me). Eso lo
- * hace AuthService.restoreSession() al bootear la app (ver app.config.ts).
+ * Consequence: on page reload there's no synchronous way to know whether
+ * there's a session — the server has to be asked (GET /api/users/me).
+ * AuthService.restoreSession() does that on app boot (see app.config.ts).
  *
- * Gate claims (est/pwd/onb) reflejan el estado la última vez que se llamó a
- * /me (login, refresh, o el bootstrap), no necesariamente el instante actual
- * — el backend es quien realmente lo aplica en cada request. patchClaims()
- * sigue existiendo para el mismo atajo optimista de siempre: reflejar en la
- * UI que el onboarding terminó sin esperar un round-trip.
+ * Gate claims (est/pwd/onb) reflect the state as of the last call to /me
+ * (login, refresh, or the bootstrap), not necessarily the current instant —
+ * the backend is what actually enforces it on every request. patchClaims()
+ * still exists for the same optimistic shortcut as always: reflect in the UI
+ * that onboarding finished without waiting for a round-trip.
  *
- * Al no haber más localStorage no hay evento `storage` que sincronice
- * pestañas: sin esto, cerrar sesión en la pestaña A deja a la B mostrando la
- * UI de logueado hasta que dispare un request y le vuelva 401. clear() avisa
- * por BroadcastChannel a las demás pestañas del mismo origen para que se
- * enteren en el acto — ver clearRemota().
+ * With no more localStorage there's no `storage` event to sync tabs: without
+ * this, logging out in tab A leaves tab B showing the logged-in UI until it
+ * fires a request and gets a 401 back. clear() notifies the other tabs of the
+ * same origin over BroadcastChannel so they find out immediately — see
+ * clearRemote().
  */
 @Injectable({ providedIn: 'root' })
 export class TokenStoreService {
@@ -58,29 +58,30 @@ export class TokenStoreService {
 
   constructor() {
     this.channel?.addEventListener('message', (event: MessageEvent) => {
-      if (event.data === SESSION_CLEARED) this.clearRemota();
+      if (event.data === SESSION_CLEARED) this.clearRemote();
     });
   }
 
-  /** Tras login, refresh, o el bootstrap de la app: puebla la sesión desde /me. */
+  /** After login, refresh, or the app bootstrap: populates the session from /me. */
   setFromMe(me: MeResponse): void {
-    this._claims.set(claimsDeMe(me));
+    this._claims.set(claimsFromMe(me));
     this._authenticated.set(true);
   }
 
   /**
-   * Marca que hay sesión SIN esperar a /me. Necesario porque /me puede fallar
-   * con un 403 de gate (cuenta pendiente, onboarding) para una cuenta
-   * perfectamente autenticada — y authGuard, que solo mira isAuthenticated(),
-   * tiene que dejar pasar a /cuenta-pendiente u /onboarding en ese caso. Sin
-   * esto, el interceptor redirige ahí y authGuard rebota derecho a /login,
-   * porque nunca se llamó a setFromMe().
+   * Marks a session as present WITHOUT waiting for /me. Needed because /me
+   * can fail with a 403 gate (pending account, onboarding) for a perfectly
+   * authenticated account — and authGuard, which only looks at
+   * isAuthenticated(), has to let it through to /cuenta-pendiente or
+   * /onboarding in that case. Without this, the interceptor redirects there
+   * and authGuard bounces straight back to /login, because setFromMe() was
+   * never called.
    */
   markSessionEstablished(): void {
     this._authenticated.set(true);
   }
 
-  /** Merge parcial sin red — atajo optimista tras completar onboarding. */
+  /** Partial merge with no network call — optimistic shortcut after finishing onboarding. */
   patchClaims(partial: Partial<SessionClaims>): void {
     const current = this._claims();
     if (current) {
@@ -89,12 +90,12 @@ export class TokenStoreService {
   }
 
   /**
-   * Todo caller de clear() (logout, interceptor ante session-closed/
-   * -superseded/not-authenticated, reLogin desde cuenta-pendiente, el
-   * cambio de contraseña) ya navega a /login por su cuenta en SU pestaña —
-   * ver app-shell.logout(), auth.interceptor.ts, account-pending.ts,
-   * change-password.ts. Por eso clear() no navega: solo avisa a las demás
-   * pestañas, y es clearRemota() quien lo hace por ellas.
+   * Every caller of clear() (logout, the interceptor on session-closed/
+   * -superseded/not-authenticated, reLogin from account-pending, the password
+   * change) already navigates to /login on its own in ITS tab — see
+   * app-shell.logout(), auth.interceptor.ts, account-pending.ts,
+   * change-password.ts. That's why clear() doesn't navigate: it only notifies
+   * the other tabs, and clearRemote() is what does it for them.
    */
   clear(): void {
     this._claims.set(null);
@@ -102,13 +103,13 @@ export class TokenStoreService {
     this.channel?.postMessage(SESSION_CLEARED);
   }
 
-  /** Reacciona al aviso de otra pestaña: limpia el estado local y, a diferencia
-   * de clear(), navega — acá no hubo ningún request que la hubiera mandado ya. */
-  private clearRemota(): void {
+  /** Reacts to another tab's notification: clears local state and, unlike
+   * clear(), navigates — there was no request here that already sent it. */
+  private clearRemote(): void {
     this._claims.set(null);
     this._authenticated.set(false);
     if (!this.router.url.startsWith('/login')) {
-      this.router.navigate(['/login'], { queryParams: { motivo: 'session-closed' } });
+      this.router.navigate(['/login'], { queryParams: { reason: 'session-closed' } });
     }
   }
 }
