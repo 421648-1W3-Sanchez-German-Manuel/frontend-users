@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { catchError, switchMap, throwError, timer } from 'rxjs';
 import { ApiError, ProblemDetails, problemTypeSlug } from '../models/problem-details.model';
 import { ToastService } from '../services/toast.service';
-import { TokenStoreService } from '../services/token-store.service';
+import { AuthService } from '../services/auth.service';
 
 /** Types the component itself is expected to show inline (form errors, countdowns). */
 const INLINE_HANDLED = new Set([
@@ -48,7 +48,7 @@ function isProblemDetails(value: unknown): value is ProblemDetails {
  * means one of three independent gates (account/password/onboarding).
  */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  const tokenStore = inject(TokenStoreService);
+  const authService = inject(AuthService);
   const router = inject(Router);
   const toast = inject(ToastService);
 
@@ -65,7 +65,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         case 'session-closed':
         case 'session-superseded':
         case 'not-authenticated': {
-          tokenStore.clear();
+          // clearLocalSession and NOT tokenStore.clear(): the silent-refresh
+          // timer lives in AuthService and would keep firing POST /refresh
+          // with dead tokens. Each of its 401s re-emits SESSION_CLEARED over
+          // BroadcastChannel and knocks down the other tabs — even the one
+          // holding the live session — until cookies are wiped by hand.
+          authService.clearLocalSession();
           if (!req.context.get(SILENT_AUTH_CHECK) && !router.url.startsWith('/login')) {
             router.navigate(['/login'], { queryParams: { motivo: slug } });
           }
