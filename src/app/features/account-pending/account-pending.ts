@@ -37,8 +37,17 @@ export class AccountPending {
     });
   }
 
+  /**
+   * Goes back to /login after killing the session on the server. Without the
+   * logout, the old session (S1) stays alive in Redis: when the next login
+   * mints S2, any delayed request still carrying S1 answers
+   * session-superseded and its broadcast takes down even the tab holding the
+   * live session.
+   */
   reLogin(): void {
-    this.authService.clearLocalSession();
-    this.router.navigateByUrl('/login');
+    this.authService.logout().subscribe({
+      next: () => this.router.navigateByUrl('/login'),
+      error: () => this.router.navigateByUrl('/login'),
+    });
   }
 }

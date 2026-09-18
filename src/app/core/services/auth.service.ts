@@ -196,7 +196,7 @@ export class AuthService {
         return this.refresh({ silent: true }).pipe(
           map(() => void 0),
           catchError(() => {
-            this.tokenStore.clear();
+            this.clearLocalSession();
             return of(void 0);
           })
         );
