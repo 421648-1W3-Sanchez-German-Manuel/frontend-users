@@ -9,9 +9,13 @@
     <p class="text-sm mb-4" style="color: var(--color-text-muted)">
       Agregá un email docente a la whitelist sin esperar su solicitud.
     </p>
+    <label class="sr-only" for="whitelistEmailDirecto">Email a habilitar</label>
     <div class="flex flex-col sm:flex-row gap-2">
       <input
+        id="whitelistEmailDirecto"
+        type="email"
         class="fu-input flex-1"
+        aria-label="Email a habilitar"
         placeholder="email@frc.utn.edu.ar"
         [value]="directEmail()"
         (input)="directEmail.set($any($event.target).value)"
