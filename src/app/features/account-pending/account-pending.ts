@@ -38,10 +38,11 @@ export class AccountPending {
   }
 
   /**
-   * Vuelve a /login matando primero la sesion en el servidor. Sin el logout,
-   * la sesion vieja (S1) queda viva en Redis: cuando el proximo login emite
-   * S2, cualquier request demorado con S1 contesta session-superseded y su
-   * broadcast voltea hasta la pestana con la sesion vigente.
+   * Goes back to /login after killing the session on the server. Without the
+   * logout, the old session (S1) stays alive in Redis: when the next login
+   * mints S2, any delayed request still carrying S1 answers
+   * session-superseded and its broadcast takes down even the tab holding the
+   * live session.
    */
   reLogin(): void {
     this.authService.logout().subscribe({

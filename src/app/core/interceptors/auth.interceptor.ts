@@ -65,11 +65,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         case 'session-closed':
         case 'session-superseded':
         case 'not-authenticated': {
-          // clearLocalSession y NO tokenStore.clear(): el timer de silent
-          // refresh vive en AuthService y seguiria disparando POST /refresh
-          // con tokens muertos. Cada 401 suyo re-emite SESSION_CLEARED por
-          // BroadcastChannel y tumba a las demas pestanas — incluso a la que
-          // tiene la sesion vigente — hasta obligar a borrar cookies a mano.
+          // clearLocalSession and NOT tokenStore.clear(): the silent-refresh
+          // timer lives in AuthService and would keep firing POST /refresh
+          // with dead tokens. Each of its 401s re-emits SESSION_CLEARED over
+          // BroadcastChannel and knocks down the other tabs — even the one
+          // holding the live session — until cookies are wiped by hand.
           authService.clearLocalSession();
           if (!req.context.get(SILENT_AUTH_CHECK) && !router.url.startsWith('/login')) {
             router.navigate(['/login'], { queryParams: { motivo: slug } });
