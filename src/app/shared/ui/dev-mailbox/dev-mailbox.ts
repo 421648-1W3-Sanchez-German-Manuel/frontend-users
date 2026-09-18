@@ -269,7 +269,7 @@ const REFRESCO_MS = 5000;
 
         <button
           type="button"
-          class="fu-btn fu-btn--sm fu-btn--secondary shadow-lg"
+          class="fu-btn fu-btn--sm fu-btn--secondary shadow-[var(--shadow-lg)]"
           (click)="abierto.set(!abierto())"
           [attr.aria-expanded]="abierto()"
           aria-label="Buzón de desarrollo"

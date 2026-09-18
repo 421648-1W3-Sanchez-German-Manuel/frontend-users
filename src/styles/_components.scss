@@ -1,6 +1,14 @@
 // Flat, hard-edged "8-bit" component classes — solid borders, offset block
 // shadows instead of blur, snappy step transitions instead of smooth easing.
 
+// These live in Tailwind's `components` layer on purpose. Unlayered they outrank
+// EVERY utility, because CSS ranks unlayered rules above layered ones — so
+// `.fu-input`'s `w-full` silently beat the `sm:w-40` of the sibling `<select>`
+// in the whitelist admin, the select took the whole flex row and the email
+// input collapsed to its padding. Inside the layer the utility wins, which is
+// what a template that bothers to write one expects.
+@layer components {
+
 .fu-card {
   @apply rounded-[var(--radius-lg)] p-6 relative;
   background: var(--color-surface);
@@ -185,3 +193,4 @@
 .fu-alert--warning { border-color: var(--color-gold); color: var(--color-warning); }
 .fu-alert--success { border-color: var(--color-success); color: var(--color-success); }
 .fu-alert--info { border-color: var(--color-cyan); color: var(--color-cyan); }
+}
