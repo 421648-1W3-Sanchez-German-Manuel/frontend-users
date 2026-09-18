@@ -25,11 +25,11 @@ const INLINE_HANDLED = new Set([
 const RETRIED_503 = new HttpContextToken<boolean>(() => false);
 
 /**
- * Para el chequeo de sesión al bootear la app (AuthService.restoreSession):
- * un visitante anónimo en una página pública (login, activación por link)
- * también dispara ese GET /me, y un 401 ahí es esperado, no un evento de
- * sesión perdida. Sin este flag, el caso de abajo redirigiría a /login por
- * encima de la ruta pública que la persona en realidad quería abrir.
+ * For the session check on app boot (AuthService.restoreSession): an
+ * anonymous visitor on a public page (login, activation via link) also fires
+ * that GET /me, and a 401 there is expected, not a lost-session event.
+ * Without this flag, the case below would redirect to /login over the public
+ * route the person actually meant to open.
  */
 export const SILENT_AUTH_CHECK = new HttpContextToken<boolean>(() => false);
 
@@ -72,7 +72,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           // holding the live session — until cookies are wiped by hand.
           authService.clearLocalSession();
           if (!req.context.get(SILENT_AUTH_CHECK) && !router.url.startsWith('/login')) {
-            router.navigate(['/login'], { queryParams: { motivo: slug } });
+            router.navigate(['/login'], { queryParams: { reason: slug } });
           }
           return throwError(() => apiError);
         }

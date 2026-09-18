@@ -16,16 +16,16 @@
     <p class="text-sm mb-4" style="color: var(--color-text-muted)">PAR-01 · según la dificultad del desafío.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div>
-        <label class="fu-label" for="xp-basico">Básico</label>
-        <input id="xp-basico" type="number" min="0" class="fu-input" [ngModel]="xpBasico()" (ngModelChange)="xpBasico.set($event)" />
+        <label class="fu-label" for="xp-basic">Básico</label>
+        <input id="xp-basic" type="number" min="0" class="fu-input" [ngModel]="xpBasic()" (ngModelChange)="xpBasic.set($event)" />
       </div>
       <div>
-        <label class="fu-label" for="xp-medio">Medio</label>
-        <input id="xp-medio" type="number" min="0" class="fu-input" [ngModel]="xpMedio()" (ngModelChange)="xpMedio.set($event)" />
+        <label class="fu-label" for="xp-medium">Medio</label>
+        <input id="xp-medium" type="number" min="0" class="fu-input" [ngModel]="xpMedium()" (ngModelChange)="xpMedium.set($event)" />
       </div>
       <div>
-        <label class="fu-label" for="xp-avanzado">Avanzado</label>
-        <input id="xp-avanzado" type="number" min="0" class="fu-input" [ngModel]="xpAvanzado()" (ngModelChange)="xpAvanzado.set($event)" />
+        <label class="fu-label" for="xp-advanced">Avanzado</label>
+        <input id="xp-advanced" type="number" min="0" class="fu-input" [ngModel]="xpAdvanced()" (ngModelChange)="xpAdvanced.set($event)" />
       </div>
     </div>
   </section>
@@ -36,16 +36,16 @@
     <p class="text-sm mb-4" style="color: var(--color-text-muted)">PAR-02 · desafíos personalizados generados por IA, según dificultad.</p>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div>
-        <label class="fu-label" for="xp-llm-basico">Básico</label>
-        <input id="xp-llm-basico" type="number" min="0" class="fu-input" [ngModel]="xpLlmBasico()" (ngModelChange)="xpLlmBasico.set($event)" />
+        <label class="fu-label" for="xp-llm-basic">Básico</label>
+        <input id="xp-llm-basic" type="number" min="0" class="fu-input" [ngModel]="xpLlmBasic()" (ngModelChange)="xpLlmBasic.set($event)" />
       </div>
       <div>
-        <label class="fu-label" for="xp-llm-medio">Medio</label>
-        <input id="xp-llm-medio" type="number" min="0" class="fu-input" [ngModel]="xpLlmMedio()" (ngModelChange)="xpLlmMedio.set($event)" />
+        <label class="fu-label" for="xp-llm-medium">Medio</label>
+        <input id="xp-llm-medium" type="number" min="0" class="fu-input" [ngModel]="xpLlmMedium()" (ngModelChange)="xpLlmMedium.set($event)" />
       </div>
       <div>
-        <label class="fu-label" for="xp-llm-avanzado">Avanzado</label>
-        <input id="xp-llm-avanzado" type="number" min="0" class="fu-input" [ngModel]="xpLlmAvanzado()" (ngModelChange)="xpLlmAvanzado.set($event)" />
+        <label class="fu-label" for="xp-llm-advanced">Avanzado</label>
+        <input id="xp-llm-advanced" type="number" min="0" class="fu-input" [ngModel]="xpLlmAdvanced()" (ngModelChange)="xpLlmAdvanced.set($event)" />
       </div>
     </div>
   </section>
@@ -56,25 +56,25 @@
     <p class="text-sm mb-4" style="color: var(--color-text-muted)">PAR-03 · según si el desafío es obligatorio u opcional.</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <label class="fu-label" for="monedas-obligatorio">Obligatorio</label>
+        <label class="fu-label" for="coins-required">Obligatorio</label>
         <input
-          id="monedas-obligatorio"
+          id="coins-required"
           type="number"
           min="0"
           class="fu-input"
-          [ngModel]="monedasObligatorio()"
-          (ngModelChange)="monedasObligatorio.set($event)"
+          [ngModel]="coinsRequired()"
+          (ngModelChange)="coinsRequired.set($event)"
         />
       </div>
       <div>
-        <label class="fu-label" for="monedas-opcional">Opcional</label>
+        <label class="fu-label" for="coins-optional">Opcional</label>
         <input
-          id="monedas-opcional"
+          id="coins-optional"
           type="number"
           min="0"
           class="fu-input"
-          [ngModel]="monedasOpcional()"
-          (ngModelChange)="monedasOpcional.set($event)"
+          [ngModel]="coinsOptional()"
+          (ngModelChange)="coinsOptional.set($event)"
         />
       </div>
     </div>
@@ -85,15 +85,15 @@
     <h2 class="text-base mb-1" style="color: var(--color-text)">Variación de XP por calidad/tiempo</h2>
     <p class="text-sm mb-4" style="color: var(--color-text-muted)">PAR-04 · rango de ajuste aplicado sobre el XP base.</p>
     <div class="max-w-[10rem]">
-      <label class="fu-label" for="variacion-xp">Rango (±%)</label>
+      <label class="fu-label" for="xp-variation">Rango (±%)</label>
       <input
-        id="variacion-xp"
+        id="xp-variation"
         type="number"
         min="0"
         max="100"
         class="fu-input"
-        [ngModel]="variacionXpPorcentaje()"
-        (ngModelChange)="variacionXpPorcentaje.set($event)"
+        [ngModel]="xpVariationPercentage()"
+        (ngModelChange)="xpVariationPercentage.set($event)"
       />
     </div>
   </section>
@@ -104,34 +104,34 @@
     <p class="text-sm mb-4" style="color: var(--color-text-muted)">PAR-11 y PAR-14 · tutor y evaluador automáticos.</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <label class="fu-label" for="umbral-antifuga">Similitud anti-fuga del tutor (RF-IA-20)</label>
+        <label class="fu-label" for="anti-leak-threshold">Similitud anti-fuga del tutor (RF-IA-20)</label>
         <input
-          id="umbral-antifuga"
+          id="anti-leak-threshold"
           type="number"
           min="0"
           max="100"
           class="fu-input"
-          [ngModel]="umbralAntiFuga()"
-          (ngModelChange)="umbralAntiFuga.set($event)"
+          [ngModel]="antiLeakThreshold()"
+          (ngModelChange)="antiLeakThreshold.set($event)"
         />
       </div>
       <div>
-        <label class="fu-label" for="umbral-calibracion">Calibración del evaluador</label>
+        <label class="fu-label" for="evaluator-calibration">Calibración del evaluador</label>
         <input
-          id="umbral-calibracion"
+          id="evaluator-calibration"
           type="number"
           min="0"
           max="100"
           class="fu-input"
           placeholder="Sin definir"
-          [ngModel]="umbralCalibracionEvaluador()"
-          (ngModelChange)="umbralCalibracionEvaluador.set($event)"
+          [ngModel]="evaluatorCalibrationThreshold()"
+          (ngModelChange)="evaluatorCalibrationThreshold.set($event)"
         />
       </div>
     </div>
   </section>
 
-  <!-- Precios del catálogo de intercambio -->
+  <!-- Exchange catalog prices -->
   <section class="fu-card !p-0 overflow-hidden mb-6">
     <div class="p-5 pb-0">
       <h2 class="text-base mb-1" style="color: var(--color-text)">Catálogo de intercambio</h2>
@@ -146,7 +146,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of preciosIntercambio(); track item.id) {
+          @for (item of exchangePrices(); track item.id) {
             <tr class="border-t" style="border-color: var(--color-border)">
               <td class="px-5 py-3" style="color: var(--color-text)">{{ item.label }}</td>
               <td class="px-5 py-3 text-right">
@@ -156,7 +156,7 @@
                   class="fu-input text-right"
                   style="max-width: 8rem; display: inline-block"
                   [ngModel]="item.cost"
-                  (ngModelChange)="setPrecio(item.id, $event)"
+                  (ngModelChange)="setPrice(item.id, $event)"
                 />
               </td>
             </tr>
@@ -166,7 +166,7 @@
     </div>
   </section>
 
-  <!-- Asignación modelo↔función de IA -->
+  <!-- Model↔AI-function assignment -->
   <section class="fu-card !p-0 overflow-hidden mb-8">
     <div class="p-5 pb-0">
       <h2 class="text-base mb-1" style="color: var(--color-text)">Asignación modelo de IA por función</h2>
@@ -181,7 +181,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (item of asignacionesIa(); track item.id) {
+          @for (item of aiAssignments(); track item.id) {
             <tr class="border-t" style="border-color: var(--color-border)">
               <td class="px-5 py-3" style="color: var(--color-text)">{{ item.label }}</td>
               <td class="px-5 py-3 text-right">
@@ -189,7 +189,7 @@
                   class="fu-input"
                   style="max-width: 12rem; display: inline-block"
                   [ngModel]="item.model"
-                  (ngModelChange)="setModelo(item.id, $event)"
+                  (ngModelChange)="setModel(item.id, $event)"
                 >
                   @for (model of aiModels; track model) {
                     <option [value]="model">{{ model }}</option>
@@ -203,5 +203,5 @@
     </div>
   </section>
 
-  <button fuButton variant="primary" size="lg" class="w-full" (click)="guardar()">Guardar cambios</button>
+  <button fuButton variant="primary" size="lg" class="w-full" (click)="save()">Guardar cambios</button>
 </div>

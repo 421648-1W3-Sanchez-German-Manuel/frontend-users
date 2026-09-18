@@ -33,14 +33,14 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/activate/activate').then((m) => m.Activate),
   },
   /**
-   * El path que manda el backend en el mail, en ingles.
+   * The path the backend sends in the mail, in English.
    *
-   * `RegistrationService` arma `{FRONT_URL}/activate?token=...` (y el HANDOFF lo
-   * documenta asi), pero la ruta de esta app esta en castellano. Sin este alias
-   * el enlace de activacion cae en el 404 del router y el flujo 2 no existe.
-   * El mismo componente en los dos paths, no un redirect: un redirect deja la
-   * conservacion del `?token=` a merced del router, y ese token es de un solo
-   * uso — si se pierde, la persona se queda sin cuenta.
+   * `RegistrationService` builds `{FRONT_URL}/activate?token=...` (and the
+   * HANDOFF documents it that way), but this app's route is in Spanish.
+   * Without this alias the activation link falls into the router's 404 and
+   * flow 2 doesn't exist. Same component on both paths, not a redirect: a
+   * redirect leaves the `?token=` preserved at the router's mercy, and that
+   * token is single-use — if it's lost, the person is locked out of the account.
    */
   {
     path: 'activate',
@@ -60,8 +60,8 @@ export const routes: Routes = [
     path: 'restablecer-password',
     loadComponent: () => import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),
   },
-  /** Idem: `PasswordService` manda `{FRONT_URL}/reset?token=...`. Enlace de un
-   *  solo uso y 15 minutos de vida, asi que un 404 acá no se puede reintentar. */
+  /** Same idea: `PasswordService` sends `{FRONT_URL}/reset?token=...`.
+   *  Single-use link with a 15-minute lifetime, so a 404 here can't be retried. */
   {
     path: 'reset',
     loadComponent: () => import('./features/auth/reset-password/reset-password').then((m) => m.ResetPassword),

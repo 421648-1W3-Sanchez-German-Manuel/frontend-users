@@ -44,15 +44,15 @@ export class OtpInput {
 
   protected readonly indices = Array.from({ length: LENGTH }, (_, i) => i);
   /**
-   * Una casilla vacia vale '' y NO un caracter de relleno.
+   * An empty box is worth '' and NOT a filler character.
    *
-   * Antes esto era un padEnd con un byte NUL crudo escrito en el fuente (el
-   * archivo daba "binary file" en git). Cada casilla vacia arrancaba con ese
-   * NUL y, como el input es maxlength="1", quedaba LLENA: el navegador
-   * rechazaba el primer digito que tipeaba la persona y el codigo de 2FA no se
-   * podia ingresar. Se ve como una casilla vacia que no responde, porque el NUL
-   * no se dibuja. Pegar el codigo si andaba, que es lo que lo hacia dificil de
-   * reproducir.
+   * This used to be a padEnd with a raw NUL byte written into the source (the
+   * file came back "binary file" in git). Every empty box started out with
+   * that NUL and, since the input is maxlength="1", it was already FULL: the
+   * browser rejected the first digit the person typed and the 2FA code
+   * couldn't be entered. It looks like an unresponsive empty box, because the
+   * NUL doesn't render. Pasting the code did work, which is what made it hard
+   * to reproduce.
    */
   protected readonly chars = computed(() =>
     Array.from({ length: LENGTH }, (_, i) => this.value()[i] ?? ''),

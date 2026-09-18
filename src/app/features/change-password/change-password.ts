@@ -55,7 +55,7 @@ export class ChangePassword {
         // Changing the password closes the session by design — go straight
         // back to login instead of pretending we're still authenticated.
         this.authService.clearLocalSession();
-        this.router.navigate(['/login'], { queryParams: { motivo: 'password-changed' } });
+        this.router.navigate(['/login'], { queryParams: { reason: 'password-changed' } });
       },
       error: (error: unknown) => {
         this.loading.set(false);
