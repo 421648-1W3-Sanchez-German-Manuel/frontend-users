@@ -1,29 +1,35 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, Signal, computed, signal } from '@angular/core';
 import { TokenStoreService } from '../../../core/services/token-store.service';
 
-/** A mail already chewed up by the mailbox: it either carries a code, or a link. */
+/**
+ * A mail already chewed up by the mailbox: it either carries a code, or a link.
+ * Keys are Spanish because this is the wire payload `tpi-compose/dev-mailbox/server.js`
+ * sends as-is — not our identifiers, so don't "fix" them without adding a mapper.
+ */
 interface MailDev {
   id: string;
-  to: string | null;
-  subject: string | null;
-  type: string | null;
-  date: string;
-  code: string | null;
-  link: string | null;
+  para: string | null;
+  asunto: string | null;
+  tipo: string | null;
+  fecha: string;
+  codigo: string | null;
+  enlace: string | null;
 }
 
 /**
  * A call the Gateway routed to a micro. Written by api-gateway's
  * InterMicroTraceFilter into Redis; arrives here via /dev/logs.
+ * `origen/destino/metodo` are Spanish because that's what the filter writes —
+ * not our identifiers, so don't "fix" them without adding a mapper.
  */
 interface Trace {
   ts: string;
   requestId: string;
   traceId: string;
-  origin: 'PERSON' | 'MS' | 'ANON';
+  origen: 'PERSON' | 'MS' | 'ANON';
   actor?: string;
-  destination: string;
-  method: string;
+  destino: string;
+  metodo: string;
   path: string;
   status: number;
   ms: number;
@@ -173,28 +179,28 @@ const REFRESH_MS = 5000;
                     @for (mail of visible(); track mail.id) {
                       <li class="px-3 py-2" style="border-bottom: 1px solid var(--color-border)">
                         <div class="flex items-baseline gap-2">
-                          <span class="text-xs truncate flex-1" style="color: var(--color-text)">{{ mail.to }}</span>
-                          <span class="text-xs shrink-0" style="color: var(--color-text-faint)">{{ time(mail.date) }}</span>
+                          <span class="text-xs truncate flex-1" style="color: var(--color-text)">{{ mail.para }}</span>
+                          <span class="text-xs shrink-0" style="color: var(--color-text-faint)">{{ time(mail.fecha) }}</span>
                         </div>
-                        <p class="text-xs mt-0.5" style="color: var(--color-text-faint)">{{ typeLabel(mail.type) }}</p>
+                        <p class="text-xs mt-0.5" style="color: var(--color-text-faint)">{{ typeLabel(mail.tipo) }}</p>
 
-                        @if (mail.code) {
+                        @if (mail.codigo) {
                           <div class="mt-1.5 flex items-center gap-2">
-                            <code class="text-base tracking-[0.3em]" style="color: var(--color-cyan)">{{ mail.code }}</code>
-                            <button type="button" class="fu-btn fu-btn--sm fu-btn--ghost" (click)="copy(mail.code!, mail.id)">
+                            <code class="text-base tracking-[0.3em]" style="color: var(--color-cyan)">{{ mail.codigo }}</code>
+                            <button type="button" class="fu-btn fu-btn--sm fu-btn--ghost" (click)="copy(mail.codigo!, mail.id)">
                               {{ copied() === mail.id ? '✓ copiado' : 'copiar' }}
                             </button>
                           </div>
                         }
 
-                        @if (mail.link) {
+                        @if (mail.enlace) {
                           <div class="mt-1.5 flex items-center gap-2">
                             <a
                               class="text-xs truncate flex-1 underline"
                               style="color: var(--color-cyan)"
-                              [href]="mail.link"
-                            >{{ mail.link }}</a>
-                            <button type="button" class="fu-btn fu-btn--sm fu-btn--ghost" (click)="copy(mail.link!, mail.id)">
+                              [href]="mail.enlace"
+                            >{{ mail.enlace }}</a>
+                            <button type="button" class="fu-btn fu-btn--sm fu-btn--ghost" (click)="copy(mail.enlace!, mail.id)">
                               {{ copied() === mail.id ? '✓' : 'copiar' }}
                             </button>
                           </div>
@@ -242,14 +248,14 @@ const REFRESH_MS = 5000;
                     @for (log of logs(); track log.requestId) {
                       <li class="px-3 py-2" style="border-bottom: 1px solid var(--color-border)">
                         <div class="flex items-baseline gap-2">
-                          <span class="fu-badge text-[10px] shrink-0" [style.background-color]="colorOrigin(log.origin)">
-                            {{ log.origin }}
+                          <span class="fu-badge text-[10px] shrink-0" [style.background-color]="colorOrigin(log.origen)">
+                            {{ log.origen }}
                           </span>
-                          <span class="text-xs truncate flex-1" style="color: var(--color-text)">{{ log.destination }}</span>
+                          <span class="text-xs truncate flex-1" style="color: var(--color-text)">{{ log.destino }}</span>
                           <span class="text-xs shrink-0" style="color: var(--color-text-faint)">{{ time(log.ts) }}</span>
                         </div>
                         <p class="text-xs mt-0.5 truncate" style="color: var(--color-text-faint)">
-                          {{ log.method }} {{ log.path }}
+                          {{ log.metodo }} {{ log.path }}
                         </p>
                         <p class="text-xs mt-0.5 flex items-center gap-2">
                           <span [style.color]="colorStatus(log.status)">{{ log.status }}</span>
@@ -305,7 +311,7 @@ export class DevMailbox implements OnDestroy {
 
   protected readonly visible = computed(() => {
     const f = this.filter().trim().toLowerCase();
-    return f ? this.mails().filter((m) => m.to?.toLowerCase().includes(f)) : this.mails();
+    return f ? this.mails().filter((m) => m.para?.toLowerCase().includes(f)) : this.mails();
   });
 
   private timer?: ReturnType<typeof setInterval>;
@@ -390,14 +396,14 @@ export class DevMailbox implements OnDestroy {
       await new Promise((r) => setTimeout(r, 250));
       await this.loadLogs();
       const first = this.logs()[0];
-      if (first?.destination === 'echo-service' && first.path === `/api/echo/cliente/perfil/${id}`) return;
+      if (first?.destino === 'echo-service' && first.path === `/api/echo/cliente/perfil/${id}`) return;
       if (this.errorLogs()) return;
     }
   }
 
   /** Badge color: cyan for person, green for service, gray for anonymous/undefined. */
-  protected colorOrigin(origin: Trace['origin']): string {
-    return { PERSON: 'rgba(34,211,238,0.18)', MS: 'rgba(74,222,128,0.18)', ANON: 'rgba(148,163,184,0.18)' }[origin] ?? 'rgba(148,163,184,0.18)';
+  protected colorOrigin(origen: Trace['origen']): string {
+    return { PERSON: 'rgba(34,211,238,0.18)', MS: 'rgba(74,222,128,0.18)', ANON: 'rgba(148,163,184,0.18)' }[origen] ?? 'rgba(148,163,184,0.18)';
   }
 
   protected colorStatus(status: number): string {
