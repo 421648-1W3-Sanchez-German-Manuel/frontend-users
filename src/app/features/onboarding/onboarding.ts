@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthShell } from '../../shared/ui/auth-shell/auth-shell';
 import { FuButton } from '../../shared/ui/button/button';
 import { AuthService } from '../../core/services/auth.service';
+import { GitLinkService } from '../../core/services/git-link.service';
 import { ApiError } from '../../core/models/problem-details.model';
 
 interface TourStep {
@@ -18,75 +18,101 @@ const TOUR_STEPS: TourStep[] = [
   { icon: '🐙', title: 'Sumá tu GitHub', body: 'Lo vamos a usar para vincular tus entregas y proyectos automáticamente.' },
 ];
 
+type Phase = 'tour' | 'link';
+
+/**
+ * Onboarding = tour + real OAuth link (DEC-GL-11). No text input: the GitHub
+ * handle is never typed by hand. The tour PATCH alone does NOT open the gate
+ * (DEC-GL-14) — the successful callback does.
+ */
 @Component({
   selector: 'fu-onboarding',
   standalone: true,
-  imports: [ReactiveFormsModule, AuthShell, FuButton],
+  imports: [AuthShell, FuButton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './onboarding.html',
 })
 export class Onboarding {
-  private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
+  private readonly gitLinks = inject(GitLinkService);
   private readonly router = inject(Router);
 
   protected readonly steps = TOUR_STEPS;
   protected readonly stepIndex = signal(0);
-  protected readonly tourDone = signal(false);
-
-  protected readonly form = this.fb.nonNullable.group({
-    githubUsername: ['', Validators.required],
-    avatarRef: [''],
-  });
+  protected readonly phase = signal<Phase>('tour');
+  /** GitHub disabled backend-side (DEC-GL-05 escape): the tour alone lets in. */
+  protected readonly githubDisabled = signal(false);
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+
+  constructor() {
+    // The callback closed the link but the refresh failed before navigating:
+    // GET /me already carries the mirror — do not show the button again.
+    this.authService.me().subscribe({
+      next: (me) => {
+        if (me.githubUsername) this.enter();
+      },
+      error: () => void 0,
+    });
+  }
 
   next(): void {
     if (this.stepIndex() < this.steps.length - 1) {
       this.stepIndex.update((i) => i + 1);
     } else {
-      this.tourDone.set(true);
+      this.submitTour();
     }
   }
 
-  submit(): void {
-    if (this.form.invalid || this.loading()) {
-      this.form.markAllAsTouched();
-      return;
-    }
+  /** Records the tour. Alone it never clears first_login while GitHub is on. */
+  private submitTour(): void {
+    if (this.loading()) return;
     this.loading.set(true);
     this.errorMessage.set(null);
-    const { githubUsername, avatarRef } = this.form.getRawValue();
-
-    this.authService.patchOnboarding({ githubUsername, avatarRef: avatarRef || null, tourOk: true }).subscribe({
+    this.authService.patchOnboarding({ tourOk: true }).subscribe({
       next: () => {
         this.loading.set(false);
-        // The PATCH succeeded — the backend row is updated. But the access
-        // token in memory still carries onb:true. We need a refresh to get a
-        // fresh JWT with onb:false so the backend gates pass on subsequent
-        // calls. The token-store is patched as a safety net in case the
-        // refresh has a brief delay, but the refresh is what unblocks the API.
-        this.authService.patchOnboardingClaims();
-        this.authService.refresh().subscribe({
-          next: () => this.router.navigateByUrl('/home'),
-          error: () => {
-            // Even if the refresh failed, patchOnboardingClaims() already
-            // set onb:false in memory so the gatesGuard passes. Try the
-            // home route; if the backend still rejects, the interceptor
-            // will handle it.
-            this.router.navigateByUrl('/home');
-          },
-        });
+        this.phase.set('link');
       },
       error: (error: unknown) => {
         this.loading.set(false);
-        if (error instanceof ApiError && error.slug === 'validation') {
-          this.errorMessage.set('Revisá el usuario de GitHub ingresado.');
+        this.errorMessage.set(error instanceof ApiError && error.slug === 'validation'
+          ? 'No pudimos registrar el tour. Probá de nuevo.'
+          : 'No pudimos completar el onboarding. Probá de nuevo.');
+      },
+    });
+  }
+
+  /** Full redirect, not a popup: the HttpOnly session cookies survive it. */
+  linkGithub(): void {
+    if (this.loading()) return;
+    this.loading.set(true);
+    this.errorMessage.set(null);
+    this.gitLinks.start('GITHUB').subscribe({
+      next: (res) => {
+        this.gitLinks.rememberReturn('onboarding');
+        window.location.assign(res.authorizationUrl);
+      },
+      error: (error: unknown) => {
+        this.loading.set(false);
+        if (error instanceof ApiError && error.slug === 'provider-not-supported') {
+          this.githubDisabled.set(true);
+        } else if (error instanceof ApiError && error.slug === 'provider-already-linked') {
+          this.enter();
         } else {
-          this.errorMessage.set('No pudimos completar el onboarding. Probá de nuevo.');
+          this.errorMessage.set('No pudimos iniciar la vinculación. Probá de nuevo.');
         }
       },
+    });
+  }
+
+  /** Escape hatch: with GitHub disabled the tour is enough to enter. */
+  enter(): void {
+    this.authService.patchOnboardingClaims();
+    this.authService.refresh().subscribe({
+      next: () => this.router.navigateByUrl('/home'),
+      error: () => this.router.navigateByUrl('/home'),
     });
   }
 }

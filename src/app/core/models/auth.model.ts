@@ -86,9 +86,8 @@ export interface PasswordChangeRequest {
   newPassword: string;
 }
 
+/** DEC-GL-11: the tour flag only. Usernames/avatars are never typed by hand. */
 export interface OnboardingRequest {
-  githubUsername: string;
-  avatarRef: string | null;
   tourOk: boolean;
 }
 

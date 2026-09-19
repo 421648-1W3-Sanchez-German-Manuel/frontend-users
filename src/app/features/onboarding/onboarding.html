@@ -1,5 +1,5 @@
 <fu-auth-shell title="¡Bienvenido!" subtitle="Un par de pasos antes de arrancar" [maxWidth]="520">
-  @if (!tourDone()) {
+  @if (phase() === 'tour') {
     <div class="flex justify-center gap-2 mb-6">
       @for (s of steps; track $index) {
         <span
@@ -18,32 +18,44 @@
       <p class="text-lg max-w-xs mx-auto" style="color: var(--color-text-muted)">{{ steps[stepIndex()].body }}</p>
     </div>
 
-    <button fuButton variant="primary" size="lg" class="mt-6 w-full" (click)="next()">
+    @if (errorMessage()) {
+      <div class="fu-alert fu-alert--danger">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    <button fuButton variant="primary" size="lg" class="mt-6 w-full" (click)="next()" [loading]="loading()">
       {{ stepIndex() === steps.length - 1 ? 'Continuar' : 'Siguiente' }}
     </button>
   } @else {
-    <form [formGroup]="form" (ngSubmit)="submit()" class="flex flex-col gap-4" novalidate>
-      <div>
-        <label class="fu-label" for="githubUsername">Usuario de GitHub</label>
-        <input id="githubUsername" class="fu-input" formControlName="githubUsername" placeholder="octocat" />
-        @if (form.controls.githubUsername.invalid && form.controls.githubUsername.touched) {
-          <p class="fu-field-error">Ingresá tu usuario de GitHub.</p>
-        }
-      </div>
-      <div>
-        <label class="fu-label" for="avatarRef">Avatar (opcional)</label>
-        <input id="avatarRef" class="fu-input" formControlName="avatarRef" placeholder="URL de una imagen" />
-      </div>
-
-      @if (errorMessage()) {
-        <div class="fu-alert fu-alert--danger">
-          {{ errorMessage() }}
-        </div>
+    <div class="text-center py-4">
+      <div class="text-6xl mb-5">🐙</div>
+      <h2 class="text-lg mb-3" style="color: var(--color-text)">Vinculá tu GitHub</h2>
+      @if (githubDisabled()) {
+        <p class="text-lg max-w-xs mx-auto" style="color: var(--color-text-muted)">
+          GitHub no está disponible ahora. Podés entrar igual.
+        </p>
+      } @else {
+        <p class="text-lg max-w-xs mx-auto" style="color: var(--color-text-muted)">
+          Usá la cuenta institucional, no una personal. Si te equivocás, después la podés cambiar desde tu perfil.
+        </p>
       }
+    </div>
 
-      <button fuButton variant="primary" size="lg" type="submit" [loading]="loading()" class="w-full mt-2">
+    @if (errorMessage()) {
+      <div class="fu-alert fu-alert--danger">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    @if (githubDisabled()) {
+      <button fuButton variant="primary" size="lg" class="mt-6 w-full" (click)="enter()" [loading]="loading()">
         Terminar e ingresar
       </button>
-    </form>
+    } @else {
+      <button fuButton variant="primary" size="lg" class="mt-6 w-full" (click)="linkGithub()" [loading]="loading()">
+        Continuar con GitHub
+      </button>
+    }
   }
 </fu-auth-shell>

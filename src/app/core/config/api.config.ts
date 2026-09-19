@@ -44,4 +44,10 @@ export const API = {
   whitelist: `${API_BASE}/api/users/whitelist`,
   whitelistRequests: `${API_BASE}/api/users/whitelist/requests`,
   whitelistRequestById: (id: string) => `${API_BASE}/api/users/whitelist/requests/${id}`,
+  // Git provider linking (SPEC-git-provider-linking §9.5). The provider in the
+  // URL is the enum name: GITHUB.
+  gitLinks: `${API_BASE}/api/users/me/git-links`,
+  gitLinkStart: (provider: string) => `${API_BASE}/api/users/me/git-links/${provider}/start`,
+  gitLinkCallback: (provider: string) => `${API_BASE}/api/users/me/git-links/${provider}/callback`,
+  gitLinkByProvider: (provider: string) => `${API_BASE}/api/users/me/git-links/${provider}`,
 } as const;
