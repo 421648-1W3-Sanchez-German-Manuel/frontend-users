@@ -15,7 +15,6 @@ interface TourStep {
 const TOUR_STEPS: TourStep[] = [
   { icon: '🛡️', title: 'Tu identidad, un solo lugar', body: 'Iniciás sesión una vez y esa cuenta te sigue por toda la plataforma.' },
   { icon: '🔐', title: 'Doble verificación', body: 'Cada login pide un código que te llega por email, además de tu contraseña.' },
-  { icon: '🐙', title: 'Sumá tu GitHub', body: 'Lo vamos a usar para vincular tus entregas y proyectos automáticamente.' },
 ];
 
 type Phase = 'tour' | 'link';
