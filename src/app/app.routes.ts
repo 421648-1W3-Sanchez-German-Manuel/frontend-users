@@ -83,6 +83,18 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./features/onboarding/onboarding').then((m) => m.Onboarding),
   },
+  /**
+   * GitHub OAuth return (DEC-GL-19): the single URI registered in the OAuth
+   * App, serving both onboarding and profile re-links. authGuard only — NOT
+   * gatesGuard: on first login onb is still true until the callback POST
+   * closes the gate.
+   */
+  {
+    path: 'vinculacion/callback',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/git-link/git-link-callback').then((m) => m.GitLinkCallback),
+  },
 
   // --- Main app shell (auth + all three gates clear) --------------------
   {

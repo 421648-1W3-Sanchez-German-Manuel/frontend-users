@@ -1,0 +1,12 @@
+<fu-auth-shell title="Vinculación con GitHub" subtitle="Completando la vinculación" [maxWidth]="520">
+  @if (status() === 'working') {
+    <p class="text-center text-lg" style="color: var(--color-text-muted)">Estamos vinculando tu cuenta…</p>
+  } @else {
+    <div class="fu-alert fu-alert--danger">
+      {{ errorMessage() }}
+    </div>
+    <button fuButton variant="primary" size="lg" class="mt-6 w-full" (click)="retry()">
+      Volver a intentar
+    </button>
+  }
+</fu-auth-shell>

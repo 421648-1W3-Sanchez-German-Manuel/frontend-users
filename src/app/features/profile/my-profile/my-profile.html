@@ -42,7 +42,53 @@
             <dd class="font-medium break-all" style="color: var(--color-text)">{{ row.value }}</dd>
           </div>
         }
+        <div>
+          <dt style="color: var(--color-text-faint)">GitHub</dt>
+          <dd class="font-medium break-all" style="color: var(--color-text)">
+            @if (me.githubUsername) {
+              @{{ me.githubUsername }}@if (linkedAt()) {
+                <span class="font-normal" style="color: var(--color-text-muted)"> · desde el {{ linkedAt() }}</span>
+              }
+            } @else {
+              Sin vincular
+            }
+          </dd>
+        </div>
       </dl>
+
+      <div class="mt-6">
+        @if (gitError()) {
+          <div class="fu-alert fu-alert--danger mb-4">
+            {{ gitError() }}
+          </div>
+        }
+        @if (me.githubUsername) {
+          @if (!confirmingUnlink()) {
+            <button fuButton variant="secondary" size="md" (click)="confirmingUnlink.set(true)" [disabled]="busy()">
+              Desvincular GitHub
+            </button>
+          } @else {
+            <div class="fu-card !p-4 text-sm">
+              <p class="mb-4" style="color: var(--color-text)">
+                ¿Desvincular @{{ me.githubUsername }}? Vas a poder vincular otra cuenta después.
+                Las entregas que ya dependan de este GitHub pueden dejar de asociarse.
+              </p>
+              <div class="flex flex-wrap gap-2">
+                <button fuButton variant="secondary" size="md" (click)="confirmingUnlink.set(false)" [disabled]="busy()">
+                  Cancelar
+                </button>
+                <button fuButton variant="primary" size="md" (click)="unlinkGithub()" [loading]="busy()">
+                  Desvincular
+                </button>
+              </div>
+            </div>
+          }
+        } @else {
+          <button fuButton variant="primary" size="md" (click)="linkGithub()" [loading]="busy()">
+            Vincular GitHub
+          </button>
+        }
+      </div>
 
       @if (me.mustChangePassword) {
         <div class="mt-6 fu-card !p-4 text-sm" style="color: var(--color-danger); border-color: var(--color-danger)">

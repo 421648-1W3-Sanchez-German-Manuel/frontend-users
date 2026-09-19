@@ -29,7 +29,14 @@ export type ErrorTypeSlug =
   | 'last-admin'
   | 'invalid-transition'
   | 'too-many-attempts'
-  | 'service-unavailable';
+  | 'service-unavailable'
+  | 'provider-not-supported'
+  | 'invalid-link-state'
+  | 'link-user-mismatch'
+  | 'provider-already-linked'
+  | 'provider-account-taken'
+  | 'provider-not-linked'
+  | 'provider-unavailable';
 
 export function problemTypeSlug(problem: ProblemDetails | null | undefined): ErrorTypeSlug | null {
   if (!problem?.type) return null;
