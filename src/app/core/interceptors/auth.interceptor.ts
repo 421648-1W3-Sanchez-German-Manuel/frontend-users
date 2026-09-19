@@ -20,6 +20,15 @@ const INLINE_HANDLED = new Set([
   'invalid-audience',
   'route-not-found',
   'email-not-whitelisted',
+  // Git provider linking (SPEC-git-provider-linking §9.5): shown inline on
+  // the onboarding/profile screens, never as a generic toast.
+  'provider-not-supported',
+  'invalid-link-state',
+  'link-user-mismatch',
+  'provider-already-linked',
+  'provider-account-taken',
+  'provider-not-linked',
+  'provider-unavailable',
 ]);
 
 const RETRIED_503 = new HttpContextToken<boolean>(() => false);
