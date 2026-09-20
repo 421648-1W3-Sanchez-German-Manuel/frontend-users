@@ -8,9 +8,13 @@ import { TokenStoreService } from '../services/token-store.service';
  * `?returnUrl=https://evil.example/login` turns our own post-login redirect
  * into an open redirect and hands the phishing page our referrer.
  * A leading `//` is protocol-relative — `//evil.example` is not a local path.
+ * A backslash is rejected anywhere, not just in front: browsers and URL
+ * parsers disagree about whether `/\evil.example` is a path or an authority,
+ * and the cheapest way not to depend on which one wins is to refuse it.
  */
 export function safeReturnUrl(raw: string | null): string | null {
-  return raw && raw.startsWith('/') && !raw.startsWith('//') ? raw : null;
+  if (!raw || !raw.startsWith('/') || raw.startsWith('//') || raw.includes('\\')) return null;
+  return raw;
 }
 
 export const authGuard: CanActivateFn = (_route, state) => {

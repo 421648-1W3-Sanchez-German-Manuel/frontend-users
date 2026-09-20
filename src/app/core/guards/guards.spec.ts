@@ -38,6 +38,11 @@ describe('safeReturnUrl', () => {
     expect(safeReturnUrl('//evil.example')).toBeNull();
   });
 
+  it('rejects a backslash, which parsers disagree about', () => {
+    expect(safeReturnUrl('/\\evil.example')).toBeNull();
+    expect(safeReturnUrl('/perfil\\@evil.example')).toBeNull();
+  });
+
   it('rejects an absent value', () => {
     expect(safeReturnUrl(null)).toBeNull();
     expect(safeReturnUrl('')).toBeNull();
