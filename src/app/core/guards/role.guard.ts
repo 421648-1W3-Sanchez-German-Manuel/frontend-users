@@ -1,9 +1,9 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanMatchFn, Router } from '@angular/router';
 import { Role } from '../models/auth.model';
 import { TokenStoreService } from '../services/token-store.service';
 
-export function roleGuard(allowed: Role[]): CanActivateFn {
+export function roleGuard(allowed: Role[]): CanMatchFn {
   return () => {
     const tokenStore = inject(TokenStoreService);
     const router = inject(Router);
