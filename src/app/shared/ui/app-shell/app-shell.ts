@@ -107,7 +107,7 @@ import { ToastService } from '../../../core/services/toast.service';
               >Solicitar whitelist</a
             >
           }
-          @if (perms.can('manageUsers') || perms.can('manageWhitelist')) {
+          @if (perms.can('manageUsers') || perms.can('manageWhitelist') || perms.can('editGlobalConfig')) {
             <p class="fu-nav-section">Administración</p>
             @if (perms.can('manageUsers')) {
               <a routerLink="/admin/usuarios" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)">Usuarios</a>
