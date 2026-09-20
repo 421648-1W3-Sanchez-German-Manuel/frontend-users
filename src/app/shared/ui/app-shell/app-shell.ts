@@ -112,9 +112,11 @@ import { ToastService } from '../../../core/services/toast.service';
             <a routerLink="/admin/whitelist" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)"
               >Whitelist</a
             >
-            <a routerLink="/admin/configuracion" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)"
-              >Configuraciones globales</a
-            >
+            @if (isAdmin()) {
+              <a routerLink="/admin/configuracion" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)"
+                >Configuraciones globales</a
+              >
+            }
           }
         </nav>
 
