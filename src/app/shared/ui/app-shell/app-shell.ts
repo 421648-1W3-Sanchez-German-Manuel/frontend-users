@@ -5,6 +5,7 @@ import { catchError, of } from 'rxjs';
 import { PageBackground } from '../page-background/page-background';
 import { ThemeToggle } from '../theme-toggle/theme-toggle';
 import { AuthService } from '../../../core/services/auth.service';
+import { PermissionsService } from '../../../core/services/permissions.service';
 import { TokenStoreService } from '../../../core/services/token-store.service';
 import { ToastService } from '../../../core/services/toast.service';
 
@@ -101,18 +102,22 @@ import { ToastService } from '../../../core/services/toast.service';
         <nav class="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-1">
           <a routerLink="/home" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)">Inicio</a>
           <a routerLink="/perfil" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)">Mi perfil</a>
-          @if (isProfessor()) {
+          @if (perms.can('requestWhitelist')) {
             <a routerLink="/whitelist/solicitar" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)"
               >Solicitar whitelist</a
             >
           }
-          @if (isAdmin() || isGestor()) {
+          @if (perms.can('manageUsers') || perms.can('manageWhitelist')) {
             <p class="fu-nav-section">Administración</p>
-            <a routerLink="/admin/usuarios" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)">Usuarios</a>
-            <a routerLink="/admin/whitelist" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)"
-              >Whitelist</a
-            >
-            @if (isAdmin()) {
+            @if (perms.can('manageUsers')) {
+              <a routerLink="/admin/usuarios" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)">Usuarios</a>
+            }
+            @if (perms.can('manageWhitelist')) {
+              <a routerLink="/admin/whitelist" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)"
+                >Whitelist</a
+              >
+            }
+            @if (perms.can('editGlobalConfig')) {
               <a routerLink="/admin/configuracion" routerLinkActive="fu-nav-active" class="fu-nav-link" (click)="sidebarOpen.set(false)"
                 >Configuraciones globales</a
               >
@@ -173,9 +178,7 @@ export class AppShell {
   private readonly router = inject(Router);
 
   protected readonly sidebarOpen = signal(false);
-  protected readonly isAdmin = computed(() => this.tokenStore.isAdmin());
-  protected readonly isGestor = computed(() => this.tokenStore.roles().includes('GESTOR'));
-  protected readonly isProfessor = computed(() => this.tokenStore.roles().includes('PROFESSOR'));
+  protected readonly perms = inject(PermissionsService);
   protected readonly me = toSignal(this.authService.me().pipe(catchError(() => of(null))), { initialValue: null });
   protected readonly initials = computed(() => {
     const me = this.me();
