@@ -3,7 +3,7 @@
 @import './styles/motion';
 @import './styles/components';
 
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Press+Start+2P&family=VT323&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @theme {
   --font-display: 'Press Start 2P', 'JetBrains Mono', monospace;
@@ -93,3 +93,117 @@ h1, h2, h3, h4 {
   background: var(--color-text);
   border: 2px solid var(--color-surface-2);
 }
+
+// Pro mode visual system (modern SaaS typography, soft rounded corners, clean shadows, hidden pixel decor)
+html[data-style='pro'] {
+  font-size: 100%;
+
+  body {
+    font-family: var(--font-sans);
+    letter-spacing: normal;
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: var(--font-display);
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+    font-weight: 700;
+  }
+
+  // Cards (both UI-KIT generic-card and local .fu-card)
+  .fu-card,
+  generic-card .card {
+    border-radius: var(--radius-md) !important;
+    border-width: 1px !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  .fu-card--hover:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow-lg) !important;
+  }
+
+  .fu-card--hover:active {
+    transform: translateY(0) !important;
+    box-shadow: var(--shadow-press) !important;
+  }
+
+  // Hide 8-bit corner pixels in Pro mode
+  generic-card .pixel {
+    display: none !important;
+  }
+
+  // Buttons (both UI-KIT generic-button and local .fu-btn)
+  .fu-btn,
+  generic-button .btn {
+    font-family: var(--font-sans) !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: 600 !important;
+    border-radius: var(--radius-sm) !important;
+    border-width: 1px !important;
+    box-shadow: var(--shadow-sm) !important;
+    transform: none !important;
+    transition: all 0.15s ease-in-out !important;
+  }
+
+  .fu-btn:hover:not(:disabled),
+  generic-button .btn:hover:not(:disabled) {
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-md) !important;
+  }
+
+  .fu-btn:active:not(:disabled),
+  generic-button .btn:active:not(:disabled) {
+    transform: translateY(0) !important;
+    box-shadow: var(--shadow-press) !important;
+  }
+
+  // Badges (both UI-KIT generic-badge and local .fu-badge)
+  .fu-badge,
+  generic-badge .badge {
+    font-family: var(--font-sans) !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: 500 !important;
+    border-radius: 9999px !important;
+    padding: 0.2rem 0.65rem !important;
+  }
+
+  // Form inputs
+  .fu-input {
+    font-family: var(--font-sans) !important;
+    border-radius: var(--radius-sm) !important;
+    border-width: 1px !important;
+  }
+
+  .fu-label {
+    font-family: var(--font-sans) !important;
+    text-transform: none !important;
+    font-size: 0.8rem !important;
+    letter-spacing: normal !important;
+    font-weight: 600 !important;
+  }
+
+  .fu-otp-digit {
+    border-radius: var(--radius-sm) !important;
+    border-width: 1px !important;
+  }
+
+  .fu-alert {
+    border-radius: var(--radius-sm) !important;
+    border-width: 1px !important;
+  }
+
+  // Retro window decoration header in Pro mode
+  .fu-window-bar {
+    border-top-left-radius: var(--radius-md);
+    border-top-right-radius: var(--radius-md);
+    border-bottom-width: 1px !important;
+  }
+
+  .fu-window-dot {
+    border-radius: 9999px !important;
+  }
+}
+
