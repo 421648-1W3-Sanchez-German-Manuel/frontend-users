@@ -2,13 +2,14 @@ import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminService } from '../../core/services/admin.service';
+import { GenericCard } from '@2026-p4-fe/ui';
 import { FuButton } from '../../shared/ui/button/button';
 import { ApiError } from '../../core/models/problem-details.model';
 
 @Component({
   selector: 'fu-whitelist-request',
   standalone: true,
-  imports: [ReactiveFormsModule, FuButton],
+  imports: [ReactiveFormsModule, FuButton, GenericCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './whitelist-request.html',
 })

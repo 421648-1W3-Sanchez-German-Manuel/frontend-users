@@ -5,12 +5,12 @@ import { AdminService } from '../../../core/services/admin.service';
 import { PermissionsService } from '../../../core/services/permissions.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ApiError } from '../../../core/models/problem-details.model';
-import { FuButton } from '../../../shared/ui/button/button';
+import { GenericButton, GenericCard } from '@2026-p4-fe/ui';
 
 @Component({
   selector: 'fu-user-role',
   standalone: true,
-  imports: [RouterLink, FuButton],
+  imports: [RouterLink, GenericCard, GenericButton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './user-role.html',
 })

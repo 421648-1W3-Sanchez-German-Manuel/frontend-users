@@ -1,7 +1,7 @@
 <div class="max-w-lg mx-auto">
   <a routerLink="/admin/usuarios" class="text-sm font-medium hover:underline" style="color: var(--color-cyan)">&larr; Volver a usuarios</a>
 
-  <div class="fu-card !p-8 mt-4">
+  <generic-card tone="magenta" padding="md" class="mt-4">
     <h1 class="text-lg mb-2" style="color: var(--color-text)">Cambiar rol</h1>
     <p class="text-sm mb-6" style="color: var(--color-text-muted)">Elegí el nuevo conjunto de roles para este usuario.</p>
 
@@ -24,8 +24,8 @@
       </div>
     }
 
-    <button fuButton variant="primary" size="lg" [loading]="loading()" [disabled]="selectedRoles().length === 0" class="w-full" (click)="submit()">
-      Guardar rol
-    </button>
-  </div>
+    <generic-button variant="magenta" size="lg" [disabled]="selectedRoles().length === 0 || loading()" class="w-full" (click)="submit()">
+      {{ loading() ? 'Guardando…' : 'Guardar roles' }}
+    </generic-button>
+  </generic-card>
 </div>

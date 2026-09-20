@@ -17,7 +17,7 @@
   />
 
   @if (users() === undefined) {
-    <div class="flex justify-center py-16"><fu-spinner [size]="32" /></div>
+    <div class="flex justify-center py-16"><generic-spinner size="md" /></div>
   } @else if (users() === null) {
     <div class="fu-card !p-8 text-center" style="color: var(--color-danger)">
       No pudimos cargar la lista de usuarios.
@@ -41,12 +41,12 @@
                 <td class="px-5 py-3" style="color: var(--color-text)">{{ user.firstNames }} {{ user.lastNames }}</td>
                 <td class="px-5 py-3" style="color: var(--color-text-muted)">{{ user.email }}</td>
                 <td class="px-5 py-3">
-                  <span class="fu-badge fu-badge--primary">{{ user.role }}</span>
+                  <generic-badge tone="cyan">{{ user.role }}</generic-badge>
                 </td>
                 <td class="px-5 py-3">
-                  <span class="fu-badge" [class.fu-badge--success]="user.accountStatus === 'ACTIVE'" [class.fu-badge--warning]="user.accountStatus !== 'ACTIVE'">
+                  <generic-badge [tone]="user.accountStatus === 'ACTIVE' ? 'green' : 'gold'">
                     {{ user.accountStatus }}
-                  </span>
+                  </generic-badge>
                 </td>
                 <td class="px-5 py-3 text-right whitespace-nowrap">
                   @if (perms.canEditUser(user)) {

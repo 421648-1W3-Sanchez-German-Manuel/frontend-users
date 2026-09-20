@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AdminService } from '../../../core/services/admin.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ApiError } from '../../../core/models/problem-details.model';
+import { GenericCard } from '@2026-p4-fe/ui';
 import { FuButton } from '../../../shared/ui/button/button';
 
 /** RF-ROL-03 - this form only creates ADMIN accounts. PROFESSOR and STUDENT
@@ -11,7 +12,7 @@ import { FuButton } from '../../../shared/ui/button/button';
 @Component({
   selector: 'fu-user-create',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, FuButton],
+  imports: [ReactiveFormsModule, RouterLink, FuButton, GenericCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './user-create.html',
 })

@@ -24,16 +24,16 @@
         <option value="PROFESSOR">Profesor</option>
         <option value="GESTOR">Gestor</option>
       </select>
-      <button fuButton variant="primary" size="sm" [disabled]="adding()" (click)="addDirect(directEmail())">
+      <generic-button variant="cyan" size="sm" [disabled]="adding()" (click)="addDirect(directEmail())">
         {{ adding() ? 'Agregando…' : 'Habilitar' }}
-      </button>
+      </generic-button>
     </div>
   </div>
 
   <h2 class="text-base mb-3" style="color: var(--color-text)">Emails habilitados</h2>
 
   @if (entries() === undefined) {
-    <div class="flex justify-center py-8"><fu-spinner [size]="24" /></div>
+    <div class="flex justify-center py-8"><generic-spinner size="sm" /></div>
   } @else if (entries() === null) {
     <div class="fu-card !p-6 text-center" style="color: var(--color-danger)">
       No pudimos cargar la whitelist.
@@ -60,7 +60,7 @@
                 <tr class="border-t" style="border-color: var(--color-border)">
                   <td class="px-5 py-3 break-all" style="color: var(--color-text)">{{ entry.email }}</td>
                   <td class="px-5 py-3">
-                    <span class="fu-badge fu-badge--primary">{{ entry.role }}</span>
+                    <generic-badge tone="cyan">{{ entry.role }}</generic-badge>
                   </td>
                   <td class="px-5 py-3" style="color: var(--color-text-muted)">
                     @if (entry.createdAt) {
@@ -69,7 +69,7 @@
                   </td>
                   <td class="px-5 py-3 text-right whitespace-nowrap">
                     @if (removingId() === entry.id) {
-                      <fu-spinner [size]="16" />
+                      <generic-spinner size="sm" />
                     } @else {
                       <button
                         class="text-xs font-medium hover:underline"
@@ -90,7 +90,7 @@
   }
 
   @if (requests() === undefined) {
-    <div class="flex justify-center py-16"><fu-spinner [size]="32" /></div>
+    <div class="flex justify-center py-16"><generic-spinner size="md" /></div>
   } @else if (requests() === null) {
     <div class="fu-card !p-10 text-center" style="color: var(--color-danger)">
       No pudimos cargar las solicitudes de whitelist. Revisá que el servicio esté activo.
@@ -112,7 +112,7 @@
                 <p class="text-sm mt-1" style="color: var(--color-text-muted)">{{ request.reason }}</p>
               }
             </div>
-            <span class="fu-badge fu-badge--warning shrink-0">Pendiente</span>
+            <generic-badge tone="gold" class="shrink-0">Pendiente</generic-badge>
           </div>
 
           <div class="mt-4">
@@ -128,11 +128,11 @@
           </div>
 
           @if (processingId() === request.id) {
-            <div class="mt-4"><fu-spinner [size]="18" /></div>
+            <div class="mt-4"><generic-spinner size="sm" /></div>
           } @else {
             <div class="mt-4 flex flex-wrap gap-2">
-              <button fuButton variant="secondary" size="sm" (click)="reject(request)">Rechazar</button>
-              <button fuButton variant="primary" size="sm" (click)="approve(request)">Aprobar</button>
+              <generic-button variant="ghost" size="sm" (click)="reject(request)">Rechazar</generic-button>
+              <generic-button variant="green" size="sm" (click)="approve(request)">Aprobar</generic-button>
             </div>
           }
         </article>
@@ -157,13 +157,9 @@
                   </p>
                 }
               </div>
-              <span
-                class="fu-badge"
-                [class.fu-badge--success]="request.status === 'APPROVED'"
-                [class.fu-badge--danger]="request.status === 'REJECTED'"
-              >
+              <generic-badge [tone]="request.status === 'APPROVED' ? 'green' : 'red'">
                 {{ statusLabel(request.status) }}
-              </span>
+              </generic-badge>
             </div>
           </article>
         }

@@ -8,6 +8,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ApiError } from '../../../core/models/problem-details.model';
 import { OtpInput } from '../../../shared/ui/otp-input/otp-input';
+import { GenericCard, GenericButton } from '@2026-p4-fe/ui';
 import { FuButton } from '../../../shared/ui/button/button';
 
 type Step = 'confirm' | 'code' | 'done';
@@ -15,7 +16,7 @@ type Step = 'confirm' | 'code' | 'done';
 @Component({
   selector: 'fu-user-delete',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, OtpInput, FuButton],
+  imports: [ReactiveFormsModule, RouterLink, OtpInput, FuButton, GenericCard, GenericButton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './user-delete.html',
 })

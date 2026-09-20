@@ -1,8 +1,8 @@
 <div class="max-w-2xl mx-auto">
   @if (profile() === undefined) {
-    <div class="flex justify-center py-20"><fu-spinner [size]="32" /></div>
+    <div class="flex justify-center py-20"><generic-spinner size="md" /></div>
   } @else if (profile(); as profile) {
-    <div class="fu-card !p-8">
+    <generic-card tone="cyan" padding="md">
       <div class="flex items-center gap-5">
         <div
           class="w-20 h-20 flex items-center justify-center text-2xl font-mono font-bold text-white shrink-0"
@@ -28,10 +28,10 @@
       <p class="text-base mt-6" style="color: var(--color-text-faint)">
         Este es el perfil público: solo se comparten nombre, apellido, GitHub y avatar entre servicios.
       </p>
-    </div>
+    </generic-card>
   } @else {
-    <div class="fu-card !p-8 text-center">
+    <generic-card tone="default" padding="md" class="text-center">
       <p style="color: var(--color-text-muted)">No encontramos este perfil.</p>
-    </div>
+    </generic-card>
   }
 </div>

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
-import { Spinner } from '../../../shared/ui/spinner/spinner';
+import { GenericBadge, GenericCard, GenericSpinner } from '@2026-p4-fe/ui';
 import { FuButton } from '../../../shared/ui/button/button';
 import { AuthService } from '../../../core/services/auth.service';
 import { GitLinkService } from '../../../core/services/git-link.service';
@@ -32,7 +32,7 @@ const UNLINK_COPY: Record<string, string> = {
 @Component({
   selector: 'fu-my-profile',
   standalone: true,
-  imports: [RouterLink, Spinner, FuButton],
+  imports: [RouterLink, GenericSpinner, GenericBadge, GenericCard, FuButton],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './my-profile.html',
 })

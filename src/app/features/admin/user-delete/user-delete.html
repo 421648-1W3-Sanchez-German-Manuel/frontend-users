@@ -1,13 +1,13 @@
 <div class="max-w-lg mx-auto">
   <a routerLink="/admin/usuarios" class="text-sm font-medium hover:underline" style="color: var(--color-cyan)">&larr; Volver a usuarios</a>
 
-  <div class="fu-card !p-8 mt-4 border-l-4" style="border-left-color: var(--color-danger)">
+  <generic-card tone="red" padding="md" class="mt-4">
     @switch (step()) {
       @case ('done') {
         <div class="text-center py-4">
           <div class="text-4xl mb-3">🗑️</div>
           <p class="text-sm" style="color: var(--color-text-muted)">La cuenta fue eliminada permanentemente.</p>
-          <button fuButton variant="secondary" class="mt-6 w-full" (click)="goToList()">Volver a usuarios</button>
+          <generic-button variant="ghost" size="md" class="mt-6 w-full" (click)="goToList()">Volver a usuarios</generic-button>
         </div>
       }
       @case ('code') {
@@ -24,9 +24,9 @@
           </div>
         }
 
-        <button fuButton variant="danger" size="lg" [loading]="loading()" [disabled]="code().length !== 6" class="w-full mt-6" (click)="confirmDelete()">
-          Eliminar definitivamente
-        </button>
+        <generic-button variant="magenta" size="lg" [disabled]="code().length !== 6 || loading()" class="w-full mt-6" (click)="confirmDelete()">
+          {{ loading() ? 'Eliminando…' : 'Eliminar definitivamente' }}
+        </generic-button>
       }
       @default {
         <h1 class="text-lg mb-2" style="color: var(--color-danger)">Eliminar usuario</h1>
@@ -61,5 +61,5 @@
         </form>
       }
     }
-  </div>
+  </generic-card>
 </div>
