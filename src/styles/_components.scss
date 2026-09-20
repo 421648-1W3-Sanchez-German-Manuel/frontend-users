@@ -194,3 +194,17 @@
 .fu-alert--success { border-color: var(--color-success); color: var(--color-success); }
 .fu-alert--info { border-color: var(--color-cyan); color: var(--color-cyan); }
 }
+
+// generic-button's own :host{display:inline-flex} is emitted unlayered by
+// Angular, so a rule placed inside @layer components would lose to it
+// regardless of specificity. This override has to stay unlayered too.
+// The inner .btn has no width rule, so a bare `w-full` class on the host
+// only stretches the host — the visible button stays content-width and the
+// rest of the row is an empty strip that still carries the (click) binding.
+generic-button.w-full {
+  display: flex;
+  width: 100%;
+}
+generic-button.w-full .btn {
+  width: 100%;
+}
