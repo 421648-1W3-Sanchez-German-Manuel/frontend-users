@@ -4,7 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthShell } from '../../../shared/ui/auth-shell/auth-shell';
 import { FuButton } from '../../../shared/ui/button/button';
 import { AuthService } from '../../../core/services/auth.service';
-import { safeReturnUrl } from '../../../core/guards/auth.guard';
+import { safeReturnUrl } from '../../../core/utils/safe-return-url';
 import { LoginFlowState } from '../../../core/services/login-flow-state.service';
 import { ApiError } from '../../../core/models/problem-details.model';
 

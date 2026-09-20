@@ -3,7 +3,8 @@ import { TestBed } from '@angular/core/testing';
 import { Route, Router, UrlTree, provideRouter } from '@angular/router';
 import { Role } from '../models/auth.model';
 import { TokenStoreService } from '../services/token-store.service';
-import { authGuard, guestGuard, safeReturnUrl } from './auth.guard';
+import { authGuard, guestGuard } from './auth.guard';
+import { safeReturnUrl } from '../utils/safe-return-url';
 import { roleGuard } from './role.guard';
 
 /** Only the slice of TokenStoreService the guards actually read. */
