@@ -116,7 +116,11 @@ export class Register {
           if (error.slug === 'duplicate-email') {
             this.errorMessage.set('Ya existe una cuenta registrada con ese email.');
           } else if (error.slug === 'email-not-whitelisted') {
-            this.errorMessage.set('Tu email no está en la lista de docentes habilitados. Contactá a un administrador.');
+            this.errorMessage.set(
+              this.tab() === 'student'
+                ? 'Solo podés registrarte con tu email institucional (@frc.utn.edu.ar).'
+                : 'Tu email no está en la lista de habilitados. Contactá a un administrador.'
+            );
           } else if (error.slug === 'validation') {
             this.errorMessage.set('Revisá los datos ingresados: alguno no cumple el formato esperado.');
           } else {
