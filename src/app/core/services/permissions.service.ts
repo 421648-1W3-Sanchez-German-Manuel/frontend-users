@@ -25,6 +25,9 @@ const RULES = {
 
 export type Capability = keyof typeof RULES;
 
+/** Derived, never hand-written: a new rule is covered by the specs for free. */
+export const ALL_CAPABILITIES = Object.keys(RULES) as Capability[];
+
 const ASSIGNABLE_ROLES: Role[] = ['STUDENT', 'PROFESSOR', 'GESTOR', 'ADMIN'];
 
 @Injectable({ providedIn: 'root' })
@@ -46,6 +49,8 @@ export class PermissionsService {
 
   /** Same rule, applied to the options offered rather than to a row. */
   assignableRoles(): Role[] {
-    return this.tokenStore.isAdmin() ? ASSIGNABLE_ROLES : ASSIGNABLE_ROLES.filter((r) => r !== 'ADMIN');
+    return this.tokenStore.isAdmin()
+      ? [...ASSIGNABLE_ROLES]
+      : ASSIGNABLE_ROLES.filter((r) => r !== 'ADMIN');
   }
 }

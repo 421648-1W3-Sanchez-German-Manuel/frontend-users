@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { MeResponse, Role } from '../models/auth.model';
-import { Capability, PermissionsService } from './permissions.service';
+import { ALL_CAPABILITIES, Capability, PermissionsService } from './permissions.service';
 import { TokenStoreService } from './token-store.service';
 
 function meWithRole(role: Role): MeResponse {
@@ -41,13 +41,6 @@ const EXPECTED: Record<Role, Capability[]> = {
   ADMIN: ['manageUsers', 'createUsers', 'manageWhitelist', 'editGlobalConfig'],
 };
 
-const ALL_CAPABILITIES: Capability[] = [
-  'requestWhitelist',
-  'manageUsers',
-  'createUsers',
-  'manageWhitelist',
-  'editGlobalConfig',
-];
 
 describe('PermissionsService · capability table', () => {
   afterEach(() => TestBed.resetTestingModule());
