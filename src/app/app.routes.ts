@@ -110,39 +110,39 @@ export const routes: Routes = [
       },
       {
         path: 'whitelist/solicitar',
-        canActivate: [roleGuard(['PROFESSOR'])],
+        canMatch: [roleGuard(['PROFESSOR'])],
         loadComponent: () =>
           import('./features/whitelist-request/whitelist-request').then((m) => m.WhitelistRequestPage),
       },
       {
         path: 'admin/usuarios',
-        canActivate: [roleGuard(['ADMIN', 'GESTOR'])],
+        canMatch: [roleGuard(['ADMIN', 'GESTOR'])],
         loadComponent: () => import('./features/admin/users-list/users-list').then((m) => m.UsersList),
       },
       /** ADMIN-only: this alta creates ADMIN accounts directly, see user-create.ts. */
       {
         path: 'admin/usuarios/nuevo',
-        canActivate: [roleGuard(['ADMIN'])],
+        canMatch: [roleGuard(['ADMIN'])],
         loadComponent: () => import('./features/admin/user-create/user-create').then((m) => m.UserCreate),
       },
       {
         path: 'admin/usuarios/:id/rol',
-        canActivate: [roleGuard(['ADMIN', 'GESTOR'])],
+        canMatch: [roleGuard(['ADMIN', 'GESTOR'])],
         loadComponent: () => import('./features/admin/user-role/user-role').then((m) => m.UserRole),
       },
       {
         path: 'admin/usuarios/:id/eliminar',
-        canActivate: [roleGuard(['ADMIN', 'GESTOR'])],
+        canMatch: [roleGuard(['ADMIN', 'GESTOR'])],
         loadComponent: () => import('./features/admin/user-delete/user-delete').then((m) => m.UserDelete),
       },
       {
         path: 'admin/whitelist',
-        canActivate: [roleGuard(['ADMIN', 'GESTOR'])],
+        canMatch: [roleGuard(['ADMIN', 'GESTOR'])],
         loadComponent: () => import('./features/admin/whitelist/whitelist-admin').then((m) => m.WhitelistAdmin),
       },
       {
         path: 'admin/configuracion',
-        canActivate: [roleGuard(['ADMIN'])],
+        canMatch: [roleGuard(['ADMIN'])],
         loadComponent: () => import('./features/admin/global-config/global-config').then((m) => m.GlobalConfig),
       },
     ],

@@ -3,6 +3,8 @@ import { Injectable, signal } from '@angular/core';
 export interface PendingChallenge {
   challengeId: string;
   email: string;
+  /** Where to land after the 2FA step. Already validated by safeReturnUrl(). */
+  returnUrl?: string | null;
 }
 
 /** In-memory bridge between the password step and the 2FA step of login. */

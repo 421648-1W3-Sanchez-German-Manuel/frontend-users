@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthShell } from '../../../shared/ui/auth-shell/auth-shell';
 import { FuButton } from '../../../shared/ui/button/button';
 import { AuthService } from '../../../core/services/auth.service';
+import { safeReturnUrl } from '../../../core/utils/safe-return-url';
 import { LoginFlowState } from '../../../core/services/login-flow-state.service';
 import { ApiError } from '../../../core/models/problem-details.model';
 
@@ -55,7 +56,11 @@ export class Login {
     this.authService.login({ email, password }).subscribe({
       next: (challenge) => {
         this.loading.set(false);
-        this.loginFlowState.set({ challengeId: challenge.challengeId, email });
+        this.loginFlowState.set({
+          challengeId: challenge.challengeId,
+          email,
+          returnUrl: safeReturnUrl(new URLSearchParams(window.location.search).get('returnUrl')),
+        });
         this.router.navigateByUrl('/verificar-codigo');
       },
       error: (error: unknown) => {
