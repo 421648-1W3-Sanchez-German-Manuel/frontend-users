@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { Spinner } from '../../shared/ui/spinner/spinner';
 import { AuthService } from '../../core/services/auth.service';
+import { Capability, PermissionsService } from '../../core/services/permissions.service';
 import { TokenStoreService } from '../../core/services/token-store.service';
 
 interface QuickAction {
@@ -11,17 +12,16 @@ interface QuickAction {
   title: string;
   body: string;
   link: string;
-  adminOnly?: boolean;
-  professorOnly?: boolean;
-  gestorOrAdmin?: boolean;
+  /** Absent means everyone with a session sees it. */
+  capability?: Capability;
 }
 
 const ACTIONS: QuickAction[] = [
   { icon: '👤', title: 'Mi perfil', body: 'Ver y compartir tu perfil público.', link: '/perfil' },
   { icon: '🔑', title: 'Cambiar contraseña', body: 'Actualizá tu contraseña de acceso.', link: '/cambiar-password' },
-  { icon: '✉️', title: 'Solicitar whitelist', body: 'Pedí que se habilite un email docente.', link: '/whitelist/solicitar', professorOnly: true },
-  { icon: '🧑‍🤝‍🧑', title: 'Usuarios', body: 'Administrá cuentas de la plataforma.', link: '/admin/usuarios', gestorOrAdmin: true },
-  { icon: '📋', title: 'Whitelist', body: 'Gestioná emails habilitados y pedidos pendientes.', link: '/admin/whitelist', gestorOrAdmin: true },
+  { icon: '✉️', title: 'Solicitar whitelist', body: 'Pedí que se habilite un email docente.', link: '/whitelist/solicitar', capability: 'requestWhitelist' },
+  { icon: '🧑‍🤝‍🧑', title: 'Usuarios', body: 'Administrá cuentas de la plataforma.', link: '/admin/usuarios', capability: 'manageUsers' },
+  { icon: '📋', title: 'Whitelist', body: 'Gestioná emails habilitados y pedidos pendientes.', link: '/admin/whitelist', capability: 'manageWhitelist' },
 ];
 
 const ROLE_LABEL: Record<string, string> = {
@@ -41,15 +41,11 @@ const ROLE_LABEL: Record<string, string> = {
 export class Home {
   private readonly authService = inject(AuthService);
   private readonly tokenStore = inject(TokenStoreService);
+  private readonly permissions = inject(PermissionsService);
 
   protected readonly me = toSignal(this.authService.me().pipe(catchError(() => of(null))), { initialValue: undefined });
-  protected readonly isAdmin = computed(() => this.tokenStore.isAdmin());
-  protected readonly isGestor = computed(() => this.tokenStore.roles().includes('GESTOR'));
-  protected readonly isProfessor = computed(() => this.tokenStore.roles().includes('PROFESSOR'));
   protected readonly actions = computed(() =>
-    ACTIONS.filter((a) => !a.adminOnly || this.isAdmin())
-      .filter((a) => !a.gestorOrAdmin || this.isAdmin() || this.isGestor())
-      .filter((a) => !a.professorOnly || this.isProfessor())
+    ACTIONS.filter((a) => !a.capability || this.permissions.can(a.capability))
   );
   protected readonly roleLabels = computed(() => this.tokenStore.roles().map((r) => ROLE_LABEL[r] ?? r));
 }
