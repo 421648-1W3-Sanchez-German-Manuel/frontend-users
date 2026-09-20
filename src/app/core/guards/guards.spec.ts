@@ -4,12 +4,17 @@ import { Route, Router, UrlTree, provideRouter } from '@angular/router';
 import { Role } from '../models/auth.model';
 import { TokenStoreService } from '../services/token-store.service';
 import { authGuard, guestGuard } from './auth.guard';
+import { permissionGuard } from './permission.guard';
 import { safeReturnUrl } from '../utils/safe-return-url';
-import { roleGuard } from './role.guard';
 
-/** Only the slice of TokenStoreService the guards actually read. */
+/** Only the slice of TokenStoreService the guards and PermissionsService read. */
 function stubStore(authenticated: boolean, roles: Role[] = []) {
-  return { isAuthenticated: () => authenticated, roles: () => roles };
+  return {
+    isAuthenticated: () => authenticated,
+    roles: () => roles,
+    isAdmin: () => roles.includes('ADMIN'),
+    hasAnyRole: (allowed: Role[]) => roles.some((role) => allowed.includes(role)),
+  };
 }
 
 function setup(authenticated: boolean, roles: Role[] = []) {
@@ -84,18 +89,27 @@ describe('guestGuard', () => {
   });
 });
 
-describe('roleGuard', () => {
+describe('permissionGuard', () => {
   afterEach(() => TestBed.resetTestingModule());
 
-  it('matches the route when the visitor holds one of the allowed roles', () => {
-    setup(true, ['ADMIN']);
-    const result = TestBed.runInInjectionContext(() => roleGuard(['ADMIN', 'GESTOR'])({} as Route, []));
+  it('matches the route when the visitor holds the capability', () => {
+    setup(true, ['GESTOR']);
+    const result = TestBed.runInInjectionContext(() => permissionGuard('manageUsers')({} as Route, []));
     expect(result).toBe(true);
   });
 
-  it('redirects to /home when the visitor holds none of them', () => {
+  it('redirects to /home when the visitor lacks it', () => {
     setup(true, ['STUDENT']);
-    const tree = asUrlTree(TestBed.runInInjectionContext(() => roleGuard(['ADMIN'])({} as Route, [])));
+    const tree = asUrlTree(TestBed.runInInjectionContext(() => permissionGuard('manageUsers')({} as Route, [])));
+    expect(tree.toString()).toBe('/home');
+  });
+
+  /** The nav used to offer global config to a GESTOR while the route refused it. */
+  it('keeps a GESTOR out of the ADMIN-only global config', () => {
+    setup(true, ['GESTOR']);
+    const tree = asUrlTree(
+      TestBed.runInInjectionContext(() => permissionGuard('editGlobalConfig')({} as Route, []))
+    );
     expect(tree.toString()).toBe('/home');
   });
 });
@@ -126,7 +140,7 @@ describe('returnUrl through a real navigation', () => {
             children: [
               { path: 'home', component: Blank },
               { path: 'perfil', component: Blank },
-              { path: 'admin/usuarios', canMatch: [roleGuard(['ADMIN', 'GESTOR'])], component: Blank },
+              { path: 'admin/usuarios', canMatch: [permissionGuard('manageUsers')], component: Blank },
             ],
           },
         ]),
