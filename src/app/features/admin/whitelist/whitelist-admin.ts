@@ -10,12 +10,12 @@ import {
   WhitelistEntry,
   WhitelistRequest,
 } from '../../../core/models/admin.model';
-import { GenericBadge, GenericButton, GenericSpinner } from '@2026-p4-fe/ui';
+import { GenericBadge, GenericButton, GenericCard, GenericSpinner } from '@2026-p4-fe/ui';
 
 @Component({
   selector: 'fu-whitelist-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, GenericSpinner, GenericBadge, GenericButton],
+  imports: [CommonModule, FormsModule, GenericSpinner, GenericBadge, GenericButton, GenericCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './whitelist-admin.html',
 })

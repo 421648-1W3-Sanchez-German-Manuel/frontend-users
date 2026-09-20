@@ -4,12 +4,12 @@ import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { AdminService } from '../../../core/services/admin.service';
 import { PermissionsService } from '../../../core/services/permissions.service';
-import { GenericBadge, GenericSpinner } from '@2026-p4-fe/ui';
+import { GenericBadge, GenericCard, GenericSpinner } from '@2026-p4-fe/ui';
 
 @Component({
   selector: 'fu-users-list',
   standalone: true,
-  imports: [RouterLink, GenericSpinner, GenericBadge],
+  imports: [RouterLink, GenericSpinner, GenericBadge, GenericCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './users-list.html',
 })

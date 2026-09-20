@@ -19,11 +19,11 @@
   @if (users() === undefined) {
     <div class="flex justify-center py-16"><generic-spinner size="md" /></div>
   } @else if (users() === null) {
-    <div class="fu-card !p-8 text-center" style="color: var(--color-danger)">
+    <generic-card tone="red" padding="md" class="text-center">
       No pudimos cargar la lista de usuarios.
-    </div>
+    </generic-card>
   } @else {
-    <div class="fu-card !p-0 overflow-hidden">
+    <generic-card tone="default" padding="none">
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <thead>
@@ -69,6 +69,6 @@
           </tbody>
         </table>
       </div>
-    </div>
+    </generic-card>
   }
 </div>

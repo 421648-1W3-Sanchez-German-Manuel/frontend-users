@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Pixelify+Sans:wght@400;500;700&family=Silkscreen:wght@400;700&display=swap');
+
+:root {
+  --font-retro: 'Silkscreen', sans-serif;
+  --font-pixel: 'Pixelify Sans', sans-serif;
+  --font-arcade: 'IBM Plex Sans', sans-serif;
+  --color-canvas: var(--bg-app);
+  --color-surface: var(--bg-surface);
+  --color-surface-2: var(--bg-surface-alt);
+  --color-line: var(--border-subtle);
+  --color-line-highlight: var(--border-highlight);
+  --color-ink: var(--text-primary);
+  --color-ink-soft: var(--text-muted);
+  --color-brand: var(--accent-primary);
+  --color-brand-2: var(--accent-secondary);
+  --color-gold: var(--accent-gold);
+  --color-danger: var(--accent-danger);
+  --color-success: var(--accent-success);
+
+  /* TPI token backward-compatibility aliases */
+  --tpi-font-family: var(--font-arcade, 'IBM Plex Sans', sans-serif);
+  --tpi-bg: var(--bg-app, #efe6d4);
+  --tpi-surface: var(--bg-surface, #f7f1e4);
+  --tpi-text: var(--text-primary, #16130f);
+  --tpi-text-secondary: var(--text-muted, #3a342c);
+  --tpi-primary: var(--accent-primary, #0c2e32);
+  --tpi-secondary: var(--accent-secondary, #141c1e);
+  --tpi-danger: var(--accent-danger, #b42318);
+  --tpi-success: var(--accent-success, #146c43);
+  --tpi-warning: var(--accent-gold, #c4921a);
+  --tpi-border: var(--border-subtle, #c4b396);
+}
+
+:root,
+:root[data-theme='light'] {
+  --bg-app: #efe6d4;
+  --bg-surface: #f7f1e4;
+  --bg-surface-alt: #eadfc8;
+  --border-subtle: #c4b396;
+  --border-highlight: #8a6a1a;
+  --text-primary: #16130f;
+  --text-muted: #3a342c;
+  --accent-primary: #0c2e32;
+  --accent-secondary: #141c1e;
+  --accent-gold: #2a1c0a;
+  --accent-danger: #b42318;
+  --accent-success: #146c43;
+  --accent-primary-fill: #5eb8c2;
+  --accent-secondary-fill: #3e7a88;
+  --accent-gold-fill: #c4921a;
+  --accent-danger-fill: #c83b35;
+  --accent-success-fill: #2a8a54;
+  --focus-glow: transparent;
+}
+
+:root[data-theme='dark'] {
+  --bg-app: #141516;
+  --bg-surface: #1e1f21;
+  --bg-surface-alt: #18191b;
+  --border-subtle: #3a3b3e;
+  --border-highlight: #b8a87a;
+  --text-primary: #e4e2dc;
+  --text-muted: #8f918e;
+  --accent-primary: #c47a68;
+  --accent-secondary: #6a92a3;
+  --accent-gold: #c4ae78;
+  --accent-danger: #c45c52;
+  --accent-success: #7a9450;
+  --accent-primary-fill: #c47a68;
+  --accent-secondary-fill: #6a92a3;
+  --accent-gold-fill: #c4ae78;
+  --accent-danger-fill: #c45c52;
+  --accent-success-fill: #7a9450;
+  --focus-glow: transparent;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background-color: var(--bg-app);
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-arcade), sans-serif;
+  font-size: 16px;
+  letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+@keyframes generic-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes generic-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}

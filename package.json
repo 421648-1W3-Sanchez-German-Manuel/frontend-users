@@ -11,7 +11,7 @@
   "private": true,
   "packageManager": "npm@11.15.0",
   "dependencies": {
-    "@2026-p4-fe/ui": "file:../../../Downloads/2026-PIV-TPI-UI-KIT-develop/dist/tpi-ui",
+    "@2026-p4-fe/ui": "file:vendor/tpi-ui",
     "@angular/common": "^22.1.7",
     "@angular/compiler": "^22.1.7",
     "@angular/core": "^22.1.7",

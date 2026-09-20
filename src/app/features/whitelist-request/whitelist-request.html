@@ -24,7 +24,9 @@
         </div>
       }
 
-      <button fuButton variant="primary" type="submit" [loading]="loading()" class="w-full">Enviar solicitud</button>
+      <generic-button variant="cyan" type="submit" [disabled]="loading()" class="w-full">
+        {{ loading() ? 'Enviando…' : 'Enviar solicitud' }}
+      </generic-button>
     </form>
   </generic-card>
 </div>
