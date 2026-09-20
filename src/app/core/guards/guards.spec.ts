@@ -1,3 +1,4 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Route, Router, UrlTree, provideRouter } from '@angular/router';
 import { Role } from '../models/auth.model';
@@ -90,5 +91,54 @@ describe('roleGuard', () => {
     setup(true, ['STUDENT']);
     const tree = asUrlTree(TestBed.runInInjectionContext(() => roleGuard(['ADMIN'])({} as Route, [])));
     expect(tree.toString()).toBe('/home');
+  });
+});
+
+@Component({ standalone: true, template: '' })
+class Blank {}
+
+/**
+ * The guards above are exercised as plain functions, which cannot see WHEN the
+ * router runs them. That matters here: canMatch is evaluated during
+ * recognition and canActivate during activation, so a child's canMatch runs
+ * BEFORE its parent's canActivate. If the role guard rejects an anonymous
+ * visitor, the router abandons the requested navigation and starts a new one,
+ * and authGuard — which builds the returnUrl — only ever sees the fallback.
+ * These tests navigate for real so that ordering is pinned.
+ */
+describe('returnUrl through a real navigation', () => {
+  afterEach(() => TestBed.resetTestingModule());
+
+  function routerWithShell(): Router {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([
+          { path: 'login', component: Blank },
+          {
+            path: '',
+            canActivate: [authGuard],
+            children: [
+              { path: 'home', component: Blank },
+              { path: 'perfil', component: Blank },
+              { path: 'admin/usuarios', canMatch: [roleGuard(['ADMIN', 'GESTOR'])], component: Blank },
+            ],
+          },
+        ]),
+        { provide: TokenStoreService, useValue: stubStore(false) },
+      ],
+    });
+    return TestBed.inject(Router);
+  }
+
+  it('keeps the destination of a plain guarded route', async () => {
+    const router = routerWithShell();
+    await router.navigateByUrl('/perfil');
+    expect(router.url).toBe('/login?returnUrl=%2Fperfil');
+  });
+
+  it('keeps the destination of a ROLE-guarded route for an anonymous visitor', async () => {
+    const router = routerWithShell();
+    await router.navigateByUrl('/admin/usuarios');
+    expect(router.url).toBe('/login?returnUrl=%2Fadmin%2Fusuarios');
   });
 });
