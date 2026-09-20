@@ -18,9 +18,21 @@ describe('ThemeService', () => {
     localStorage.clear();
   });
 
-  it('should initialize with default mode and style', () => {
-    expect(['light', 'dark']).toContain(service.mode());
+  it('should initialize with default style', () => {
     expect(service.style()).toBe('arcade');
+  });
+
+  it('should default mode to the OS color-scheme preference when nothing is stored', () => {
+    // jsdom doesn't implement matchMedia at all, unlike a real browser —
+    // define it before spying, there's nothing to spy on otherwise.
+    const original = window.matchMedia;
+    window.matchMedia = ((query: string) => ({ matches: query.includes('dark') })) as typeof window.matchMedia;
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({ providers: [ThemeService] });
+    expect(TestBed.inject(ThemeService).mode()).toBe('dark');
+
+    window.matchMedia = original;
   });
 
   it('should switch mode and persist to localStorage and DOM', () => {

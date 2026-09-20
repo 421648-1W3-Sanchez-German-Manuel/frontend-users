@@ -10,13 +10,15 @@ import { ThemeService } from '../../../core/services/theme.service';
       <!-- Color Scheme Pill: Day (Sun) / Night (Moon) -->
       <div
         class="inline-flex"
+        role="group"
+        aria-label="Esquema de color"
         style="border: 2px solid var(--color-border); border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); overflow: hidden;"
       >
         <button
           type="button"
           class="w-8 h-8 sm:w-9 sm:h-8 flex items-center justify-center text-sm transition-transform duration-75 active:translate-y-0.5"
           [style.background]="theme.mode() === 'light' ? 'var(--color-gold)' : 'var(--color-surface-2)'"
-          [style.color]="theme.mode() === 'light' ? '#171225' : 'var(--color-text)'"
+          [style.color]="theme.mode() === 'light' ? 'var(--color-gold-contrast)' : 'var(--color-text)'"
           style="border-right: 2px solid var(--color-border)"
           (click)="theme.setMode('light')"
           [attr.aria-pressed]="theme.mode() === 'light'"
@@ -42,13 +44,15 @@ import { ThemeService } from '../../../core/services/theme.service';
       <!-- Component Aesthetic Pill: Arcade / Pro -->
       <div
         class="inline-flex"
+        role="group"
+        aria-label="Estilo visual"
         style="border: 2px solid var(--color-border); border-radius: var(--radius-sm); box-shadow: var(--shadow-sm); overflow: hidden;"
       >
         <button
           type="button"
           class="px-2 h-8 flex items-center justify-center gap-1 text-xs font-semibold transition-transform duration-75 active:translate-y-0.5"
           [style.background]="theme.style() === 'arcade' ? 'var(--color-cyan)' : 'var(--color-surface-2)'"
-          [style.color]="theme.style() === 'arcade' ? '#0d0b1e' : 'var(--color-text)'"
+          [style.color]="theme.style() === 'arcade' ? 'var(--color-cyan-contrast)' : 'var(--color-text)'"
           style="border-right: 2px solid var(--color-border)"
           (click)="theme.setStyle('arcade')"
           [attr.aria-pressed]="theme.style() === 'arcade'"
@@ -62,7 +66,7 @@ import { ThemeService } from '../../../core/services/theme.service';
           type="button"
           class="px-2 h-8 flex items-center justify-center gap-1 text-xs font-semibold transition-transform duration-75 active:translate-y-0.5"
           [style.background]="theme.style() === 'pro' ? 'var(--color-magenta)' : 'var(--color-surface-2)'"
-          [style.color]="theme.style() === 'pro' ? '#ffffff' : 'var(--color-text)'"
+          [style.color]="theme.style() === 'pro' ? 'var(--color-magenta-contrast)' : 'var(--color-text)'"
           (click)="theme.setStyle('pro')"
           [attr.aria-pressed]="theme.style() === 'pro'"
           aria-label="Estilo Pro"

@@ -36,6 +36,15 @@
   --color-success: #0e8a5f;
   --color-danger: #d1264f;
   --color-warning: #a36a00;
+
+  // Foreground for text/icons sitting directly on --color-gold/-cyan/-magenta
+  // (theme-toggle's active pill state). Each value is picked to clear 4.5:1
+  // against that specific background — kept as tokens, not hardcoded hex
+  // next to the var()s that produced them, so a palette change can't
+  // silently drop back under AA.
+  --color-gold-contrast: #000000;
+  --color-cyan-contrast: #000000;
+  --color-magenta-contrast: #ffffff;
 }
 
 * {
@@ -113,97 +122,98 @@ html[data-style='pro'] {
   // Cards (both UI-KIT generic-card and local .fu-card)
   .fu-card,
   generic-card .card {
-    border-radius: var(--radius-md) !important;
-    border-width: 1px !important;
-    box-shadow: var(--shadow-md) !important;
+    border-radius: var(--radius-md);
+    border-width: 1px;
+    box-shadow: var(--shadow-md);
   }
 
   .fu-card--hover:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: var(--shadow-lg) !important;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
   }
 
   .fu-card--hover:active {
-    transform: translateY(0) !important;
-    box-shadow: var(--shadow-press) !important;
+    transform: translateY(0);
+    box-shadow: var(--shadow-press);
   }
 
-  // Hide 8-bit corner pixels in Pro mode
-  generic-card .pixel {
-    display: none !important;
+  // Hide 8-bit corner pixels and the retro background grid in Pro mode
+  generic-card .pixel,
+  .fu-noise-grid {
+    display: none;
   }
 
   // Buttons (both UI-KIT generic-button and local .fu-btn)
   .fu-btn,
   generic-button .btn {
-    font-family: var(--font-sans) !important;
-    text-transform: none !important;
-    letter-spacing: normal !important;
-    font-weight: 600 !important;
-    border-radius: var(--radius-sm) !important;
-    border-width: 1px !important;
-    box-shadow: var(--shadow-sm) !important;
-    transform: none !important;
-    transition: all 0.15s ease-in-out !important;
+    font-family: var(--font-sans);
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 600;
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    box-shadow: var(--shadow-sm);
+    transform: none;
+    transition: all 0.15s ease-in-out;
   }
 
   .fu-btn:hover:not(:disabled),
   generic-button .btn:hover:not(:disabled) {
-    transform: translateY(-1px) !important;
-    box-shadow: var(--shadow-md) !important;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
   }
 
   .fu-btn:active:not(:disabled),
   generic-button .btn:active:not(:disabled) {
-    transform: translateY(0) !important;
-    box-shadow: var(--shadow-press) !important;
+    transform: translateY(0);
+    box-shadow: var(--shadow-press);
   }
 
   // Badges (both UI-KIT generic-badge and local .fu-badge)
   .fu-badge,
   generic-badge .badge {
-    font-family: var(--font-sans) !important;
-    text-transform: none !important;
-    letter-spacing: normal !important;
-    font-weight: 500 !important;
-    border-radius: 9999px !important;
-    padding: 0.2rem 0.65rem !important;
+    font-family: var(--font-sans);
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 500;
+    border-radius: 9999px;
+    padding: 0.2rem 0.65rem;
   }
 
   // Form inputs
   .fu-input {
-    font-family: var(--font-sans) !important;
-    border-radius: var(--radius-sm) !important;
-    border-width: 1px !important;
+    font-family: var(--font-sans);
+    border-radius: var(--radius-sm);
+    border-width: 1px;
   }
 
   .fu-label {
-    font-family: var(--font-sans) !important;
-    text-transform: none !important;
-    font-size: 0.8rem !important;
-    letter-spacing: normal !important;
-    font-weight: 600 !important;
+    font-family: var(--font-sans);
+    text-transform: none;
+    font-size: 0.8rem;
+    letter-spacing: normal;
+    font-weight: 600;
   }
 
   .fu-otp-digit {
-    border-radius: var(--radius-sm) !important;
-    border-width: 1px !important;
+    border-radius: var(--radius-sm);
+    border-width: 1px;
   }
 
   .fu-alert {
-    border-radius: var(--radius-sm) !important;
-    border-width: 1px !important;
+    border-radius: var(--radius-sm);
+    border-width: 1px;
   }
 
   // Retro window decoration header in Pro mode
   .fu-window-bar {
     border-top-left-radius: var(--radius-md);
     border-top-right-radius: var(--radius-md);
-    border-bottom-width: 1px !important;
+    border-bottom-width: 1px;
   }
 
   .fu-window-dot {
-    border-radius: 9999px !important;
+    border-radius: 9999px;
   }
 }
 

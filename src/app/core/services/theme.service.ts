@@ -19,31 +19,38 @@ export class ThemeService {
     effect(() => {
       const mode = this._mode();
       const style = this._style();
-      if (typeof document !== 'undefined') {
-        document.documentElement.setAttribute('data-theme', mode);
-        document.documentElement.setAttribute('data-style', style);
-      }
-      if (typeof localStorage !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', mode);
+      document.documentElement.setAttribute('data-style', style);
+      // Incognito / blocked-cookies browsers expose localStorage but throw
+      // on access — there's no SSR here, so that's the only case worth
+      // guarding against.
+      try {
         localStorage.setItem(STORAGE_KEY_MODE, mode);
         localStorage.setItem(STORAGE_KEY_STYLE, style);
         localStorage.setItem(LEGACY_STORAGE_KEY, mode);
+      } catch {
+        // Best-effort persistence; the in-memory signal still drives the UI.
       }
     });
   }
 
   private readInitialMode(): ThemeMode {
-    if (typeof localStorage === 'undefined') return 'dark';
-    const stored = localStorage.getItem(STORAGE_KEY_MODE) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
-    if (stored === 'light' || stored === 'dark') return stored;
-    return typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches
-      ? 'dark'
-      : 'light';
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_MODE) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (stored === 'light' || stored === 'dark') return stored;
+    } catch {
+      // fall through to the media-query default
+    }
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
 
   private readInitialStyle(): ThemeStyle {
-    if (typeof localStorage === 'undefined') return 'arcade';
-    const stored = localStorage.getItem(STORAGE_KEY_STYLE);
-    return stored === 'arcade' || stored === 'pro' ? stored : 'arcade';
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_STYLE);
+      return stored === 'arcade' || stored === 'pro' ? stored : 'arcade';
+    } catch {
+      return 'arcade';
+    }
   }
 
   toggleMode(): void {
@@ -60,15 +67,5 @@ export class ThemeService {
 
   setStyle(style: ThemeStyle): void {
     this._style.set(style);
-  }
-
-  /** Backward-compatible alias for setMode */
-  set(mode: ThemeMode): void {
-    this.setMode(mode);
-  }
-
-  /** Backward-compatible alias for toggleMode */
-  toggle(): void {
-    this.toggleMode();
   }
 }
