@@ -2,11 +2,22 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { TokenStoreService } from '../services/token-store.service';
 
-export const authGuard: CanActivateFn = () => {
+/**
+ * Only same-origin relative paths survive this. `returnUrl` travels in the
+ * query string, so it is attacker-controlled: without the check,
+ * `?returnUrl=https://evil.example/login` turns our own post-login redirect
+ * into an open redirect and hands the phishing page our referrer.
+ * A leading `//` is protocol-relative — `//evil.example` is not a local path.
+ */
+export function safeReturnUrl(raw: string | null): string | null {
+  return raw && raw.startsWith('/') && !raw.startsWith('//') ? raw : null;
+}
+
+export const authGuard: CanActivateFn = (_route, state) => {
   const tokenStore = inject(TokenStoreService);
   const router = inject(Router);
   if (tokenStore.isAuthenticated()) return true;
-  return router.createUrlTree(['/login']);
+  return router.createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
 };
 
 export const guestGuard: CanActivateFn = () => {

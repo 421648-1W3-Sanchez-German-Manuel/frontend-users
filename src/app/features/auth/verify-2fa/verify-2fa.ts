@@ -62,8 +62,9 @@ export class Verify2fa implements OnInit, OnDestroy {
     this.authService.verify2fa({ challengeId: pending.challengeId, code: this.code() }).subscribe({
       next: () => {
         this.loading.set(false);
+        const target = pending.returnUrl ?? '/home';
         this.loginFlowState.clear();
-        this.router.navigateByUrl('/home');
+        this.router.navigateByUrl(target);
       },
       error: (error: unknown) => {
         this.loading.set(false);
