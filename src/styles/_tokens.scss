@@ -76,6 +76,10 @@
   --color-danger: #ff5c7a;
   --color-warning: #ffd60a;
 
+  --color-gold-contrast: #0d0b1e;
+  --color-cyan-contrast: #0d0b1e;
+  --color-magenta-contrast: #0d0b1e;
+
   --shadow-sm: 3px 3px 0 var(--color-border-strong);
   --shadow-md: 5px 5px 0 var(--color-border-strong);
   --shadow-lg: 8px 8px 0 var(--color-border-strong);
@@ -83,3 +87,35 @@
 
   color-scheme: dark;
 }
+
+:root[data-style='pro'] {
+  --font-display: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  --color-border: #d5d9eb;
+  --color-border-strong: #94a3b8;
+  // --border-subtle/--border-highlight already alias --color-border/
+  // --color-border-strong from the base :root block above; overriding
+  // those here is enough, no need to duplicate the literal values.
+
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+  --shadow-press: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+:root[data-theme='dark'][data-style='pro'] {
+  --color-border: #2a244d;
+  --color-border-strong: #3d356c;
+
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-press: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+
