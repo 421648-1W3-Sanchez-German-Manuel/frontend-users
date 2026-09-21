@@ -43,6 +43,13 @@
   --accent-gold-fill: var(--color-gold);
   --accent-danger-fill: var(--color-danger);
   --accent-success-fill: var(--color-success);
+
+  // The library reads its own font namespace too. Left undefined, its
+  // buttons and badges fall back to the inherited body font instead of the
+  // arcade face; map them onto ours so they match the remaining fu-* ones.
+  --font-arcade: var(--font-display);
+  --font-retro: var(--font-display);
+  --font-pixel: var(--font-sans);
 }
 
 :root[data-theme='dark'] {
