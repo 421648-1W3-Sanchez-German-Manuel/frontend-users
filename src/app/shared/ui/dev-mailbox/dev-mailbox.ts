@@ -455,10 +455,14 @@ export class DevMailbox implements OnDestroy {
   protected typeLabel(type: string | null): string {
     return (
       {
-        EMAIL_2FA: 'Código de acceso',
-        EMAIL_ACTIVACION_CUENTA: 'Activación de cuenta',
-        EMAIL_RESET_PASSWORD: 'Recuperar contraseña',
-        WHITELISTING_RESOLVED: 'Padrón resuelto',
+        'TWO-FACTOR-EMAIL-PREPARED': 'Código de acceso',
+        'ACCOUNT-ACTIVATION-EMAIL-PREPARED': 'Activación de cuenta',
+        'PASSWORD-RESET-EMAIL-PREPARED': 'Recuperar contraseña',
+        'REQUEST-PENDING-EMAIL-PREPARED': 'Solicitud pendiente',
+        'ENABLING-RESOLVED-EMAIL-PREPARED': 'Padrón resuelto',
+        'BREAKGLASS-ALERT-EMAIL-PREPARED': 'Alerta break-glass',
+        'WHITELIST-SUBMISSION-EMAIL-PREPARED': 'Solicitud de whitelist',
+        'WHITELIST-DECISION-EMAIL-PREPARED': 'Decisión de whitelist',
       }[type ?? ''] ?? (type ?? 'Mail')
     );
   }
