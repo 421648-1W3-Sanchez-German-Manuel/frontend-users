@@ -62,6 +62,11 @@ export class TokenStoreService {
     });
   }
 
+  /** Single place where role arithmetic happens — see PermissionsService. */
+  hasAnyRole(allowed: Role[]): boolean {
+    return this.roles().some((role) => allowed.includes(role));
+  }
+
   /** After login, refresh, or the app bootstrap: populates the session from /me. */
   setFromMe(me: MeResponse): void {
     this._claims.set(claimsFromMe(me));

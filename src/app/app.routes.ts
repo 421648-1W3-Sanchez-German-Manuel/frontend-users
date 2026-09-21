@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard, guestGuard } from './core/guards/auth.guard';
 import { gatesGuard } from './core/guards/gates.guard';
-import { roleGuard } from './core/guards/role.guard';
+import { permissionGuard } from './core/guards/permission.guard';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'home' },
@@ -110,39 +110,39 @@ export const routes: Routes = [
       },
       {
         path: 'whitelist/solicitar',
-        canMatch: [roleGuard(['PROFESSOR'])],
+        canMatch: [permissionGuard('requestWhitelist')],
         loadComponent: () =>
           import('./features/whitelist-request/whitelist-request').then((m) => m.WhitelistRequestPage),
       },
       {
         path: 'admin/usuarios',
-        canMatch: [roleGuard(['ADMIN', 'GESTOR'])],
+        canMatch: [permissionGuard('manageUsers')],
         loadComponent: () => import('./features/admin/users-list/users-list').then((m) => m.UsersList),
       },
       /** ADMIN-only: this alta creates ADMIN accounts directly, see user-create.ts. */
       {
         path: 'admin/usuarios/nuevo',
-        canMatch: [roleGuard(['ADMIN'])],
+        canMatch: [permissionGuard('createUsers')],
         loadComponent: () => import('./features/admin/user-create/user-create').then((m) => m.UserCreate),
       },
       {
         path: 'admin/usuarios/:id/rol',
-        canMatch: [roleGuard(['ADMIN', 'GESTOR'])],
+        canMatch: [permissionGuard('manageUsers')],
         loadComponent: () => import('./features/admin/user-role/user-role').then((m) => m.UserRole),
       },
       {
         path: 'admin/usuarios/:id/eliminar',
-        canMatch: [roleGuard(['ADMIN', 'GESTOR'])],
+        canMatch: [permissionGuard('manageUsers')],
         loadComponent: () => import('./features/admin/user-delete/user-delete').then((m) => m.UserDelete),
       },
       {
         path: 'admin/whitelist',
-        canMatch: [roleGuard(['ADMIN', 'GESTOR'])],
+        canMatch: [permissionGuard('manageWhitelist')],
         loadComponent: () => import('./features/admin/whitelist/whitelist-admin').then((m) => m.WhitelistAdmin),
       },
       {
         path: 'admin/configuracion',
-        canMatch: [roleGuard(['ADMIN'])],
+        canMatch: [permissionGuard('editGlobalConfig')],
         loadComponent: () => import('./features/admin/global-config/global-config').then((m) => m.GlobalConfig),
       },
     ],
