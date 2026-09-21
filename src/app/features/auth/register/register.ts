@@ -118,7 +118,7 @@ export class Register {
           } else if (error.slug === 'email-not-whitelisted') {
             this.errorMessage.set(
               this.tab() === 'student'
-                ? 'Solo podés registrarte con tu email institucional (@frc.utn.edu.ar).'
+                ? 'Solo podés registrarte con tu email institucional.'
                 : 'Tu email no está en la lista de habilitados. Contactá a un administrador.'
             );
           } else if (error.slug === 'validation') {
