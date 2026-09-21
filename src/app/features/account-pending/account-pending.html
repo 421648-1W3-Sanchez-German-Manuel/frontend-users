@@ -1,7 +1,4 @@
-<fu-auth-shell
-  [title]="isPendingEmail() ? 'Verificá tu email' : 'Cuenta en validación'"
-  [subtitle]="isPendingEmail() ? 'Tu cuenta ya fue registrada' : 'Ya activaste tu cuenta, pero falta un paso más'"
->
+<fu-auth-shell title="Cuenta en validación" subtitle="Ya activaste tu cuenta, pero falta un paso más">
   <div class="text-center">
     @if (isPendingEmail()) {
       <div class="text-5xl mb-4" style="animation: fu-float 3s ease-in-out infinite">📧</div>
