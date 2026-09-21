@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { catchError, of, switchMap } from 'rxjs';
-import { Spinner } from '../../../shared/ui/spinner/spinner';
+import { GenericCard, GenericSpinner } from '@2026-p4-fe/ui';
 import { ProfileService } from '../../../core/services/profile.service';
 
 @Component({
   selector: 'fu-public-profile',
   standalone: true,
-  imports: [Spinner],
+  imports: [GenericSpinner, GenericCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './public-profile.html',
 })

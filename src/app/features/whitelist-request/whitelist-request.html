@@ -1,5 +1,5 @@
 <div class="max-w-lg mx-auto">
-  <div class="fu-card !p-8">
+  <generic-card tone="cyan" padding="md">
     <h1 class="text-lg mb-1" style="color: var(--color-text)">Solicitar whitelist</h1>
     <p class="text-sm mb-6" style="color: var(--color-text-muted)">
       Pedí que se habilite un email para que un profesor pueda registrarse.
@@ -24,7 +24,9 @@
         </div>
       }
 
-      <button fuButton variant="primary" type="submit" [loading]="loading()" class="w-full">Enviar solicitud</button>
+      <generic-button variant="cyan" type="submit" [disabled]="loading()" class="w-full">
+        {{ loading() ? 'Enviando…' : 'Enviar solicitud' }}
+      </generic-button>
     </form>
-  </div>
+  </generic-card>
 </div>

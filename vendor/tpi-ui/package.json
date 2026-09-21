@@ -1,0 +1,43 @@
+{
+  "name": "@2026-p4-fe/ui",
+  "version": "0.3.2",
+  "peerDependencies": {
+    "@angular/common": "^22.0.0",
+    "@angular/core": "^22.0.0",
+    "@angular/platform-browser": "^22.0.0"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2026-P4-FE/2026-PIV-TPI-UI-KIT.git"
+  },
+  "sideEffects": [
+    "./theme.css",
+    "./theme/tokens.css"
+  ],
+  "exports": {
+    "./theme.css": {
+      "style": "./theme.css",
+      "default": "./theme.css"
+    },
+    "./theme/tokens.css": {
+      "style": "./theme/tokens.css",
+      "default": "./theme/tokens.css"
+    },
+    "./package.json": {
+      "default": "./package.json"
+    },
+    ".": {
+      "types": "./types/2026-p4-fe-ui.d.ts",
+      "default": "./fesm2022/2026-p4-fe-ui.mjs"
+    }
+  },
+  "module": "fesm2022/2026-p4-fe-ui.mjs",
+  "typings": "types/2026-p4-fe-ui.d.ts",
+  "type": "module",
+  "dependencies": {
+    "tslib": "^2.3.0"
+  }
+}

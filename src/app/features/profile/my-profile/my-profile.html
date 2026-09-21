@@ -1,8 +1,8 @@
 <div class="max-w-2xl mx-auto">
   @if (me() === undefined) {
-    <div class="flex justify-center py-20"><fu-spinner [size]="32" /></div>
+    <div class="flex justify-center py-20"><generic-spinner size="md" /></div>
   } @else if (me(); as me) {
-    <div class="fu-card !p-8">
+    <generic-card tone="cyan" padding="md">
       <div class="flex items-center gap-5 mb-6">
         <div
           class="w-20 h-20 flex items-center justify-center text-2xl font-mono font-bold text-white shrink-0"
@@ -17,21 +17,17 @@
       </div>
 
       <div class="flex flex-wrap gap-2 mb-6">
-        <span class="fu-badge fu-badge--primary">{{ roleLabel(me.role) }}</span>
-        <span
-          class="fu-badge"
-          [class.fu-badge--success]="statusIsActive(me.accountStatus)"
-          [class.fu-badge--warning]="!statusIsActive(me.accountStatus)"
-        >
+        <generic-badge tone="cyan">{{ roleLabel(me.role) }}</generic-badge>
+        <generic-badge [tone]="statusIsActive(me.accountStatus) ? 'green' : 'gold'">
           {{ statusLabel(me.accountStatus) }}
-        </span>
+        </generic-badge>
         @if (me.emailVerified) {
-          <span class="fu-badge fu-badge--success">Email verificado</span>
+          <generic-badge tone="green">Email verificado</generic-badge>
         } @else {
-          <span class="fu-badge fu-badge--warning">Email sin verificar</span>
+          <generic-badge tone="gold">Email sin verificar</generic-badge>
         }
         @if (me.guidedTourCompleted) {
-          <span class="fu-badge">Onboarding completado</span>
+          <generic-badge tone="neutral">Onboarding completado</generic-badge>
         }
       </div>
 
@@ -64,43 +60,43 @@
         }
         @if (me.githubUsername) {
           @if (!confirmingUnlink()) {
-            <button fuButton variant="secondary" size="md" (click)="confirmingUnlink.set(true)" [disabled]="busy()">
+            <generic-button variant="ghost" size="md" (click)="confirmingUnlink.set(true)" [disabled]="busy()">
               Desvincular GitHub
-            </button>
+            </generic-button>
           } @else {
-            <div class="fu-card !p-4 text-sm">
+            <generic-card tone="default" padding="sm" class="text-sm">
               <p class="mb-4" style="color: var(--color-text)">
                 ¿Desvincular @{{ me.githubUsername }}? Vas a poder vincular otra cuenta después.
                 Las entregas que ya dependan de este GitHub pueden dejar de asociarse.
               </p>
               <div class="flex flex-wrap gap-2">
-                <button fuButton variant="secondary" size="md" (click)="confirmingUnlink.set(false)" [disabled]="busy()">
+                <generic-button variant="ghost" size="md" (click)="confirmingUnlink.set(false)" [disabled]="busy()">
                   Cancelar
-                </button>
-                <button fuButton variant="primary" size="md" (click)="unlinkGithub()" [loading]="busy()">
-                  Desvincular
-                </button>
+                </generic-button>
+                <generic-button variant="cyan" size="md" (click)="unlinkGithub()" [disabled]="busy()">
+                  {{ busy() ? 'Desvinculando…' : 'Desvincular' }}
+                </generic-button>
               </div>
-            </div>
+            </generic-card>
           }
         } @else {
-          <button fuButton variant="primary" size="md" (click)="linkGithub()" [loading]="busy()">
-            Vincular GitHub
-          </button>
+          <generic-button variant="cyan" size="md" (click)="linkGithub()" [disabled]="busy()">
+            {{ busy() ? 'Vinculando…' : 'Vincular GitHub' }}
+          </generic-button>
         }
       </div>
 
       @if (me.mustChangePassword) {
-        <div class="mt-6 fu-card !p-4 text-sm" style="color: var(--color-danger); border-color: var(--color-danger)">
+        <generic-card tone="red" padding="sm" class="mt-6 text-sm">
           Te pedimos cambiar tu contraseña en el próximo ingreso.
-        </div>
+        </generic-card>
       }
 
       <a routerLink="/cambiar-password" class="fu-btn fu-btn--secondary mt-8 w-full sm:w-auto">Cambiar contraseña</a>
-    </div>
+    </generic-card>
   } @else {
-    <div class="fu-card !p-8 text-center" style="color: var(--color-danger)">
+    <generic-card tone="red" padding="md" class="text-center">
       No pudimos cargar tu perfil. Probá recargar la página.
-    </div>
+    </generic-card>
   }
 </div>

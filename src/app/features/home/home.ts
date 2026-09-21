@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { catchError, of } from 'rxjs';
-import { Spinner } from '../../shared/ui/spinner/spinner';
+import { GenericBadge, GenericCard, GenericSpinner } from '@2026-p4-fe/ui';
 import { AuthService } from '../../core/services/auth.service';
 import { Capability, PermissionsService } from '../../core/services/permissions.service';
 import { TokenStoreService } from '../../core/services/token-store.service';
@@ -34,7 +34,7 @@ const ROLE_LABEL: Record<string, string> = {
 @Component({
   selector: 'fu-home',
   standalone: true,
-  imports: [RouterLink, Spinner],
+  imports: [RouterLink, GenericSpinner, GenericBadge, GenericCard],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './home.html',
 })

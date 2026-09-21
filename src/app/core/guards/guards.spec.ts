@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Route, Router, UrlTree, provideRouter } from '@angular/router';
+import { PartialMatchRouteSnapshot, Route, Router, UrlTree, provideRouter } from '@angular/router';
 import { Role } from '../models/auth.model';
 import { TokenStoreService } from '../services/token-store.service';
 import { authGuard, guestGuard } from './auth.guard';
@@ -94,13 +94,19 @@ describe('permissionGuard', () => {
 
   it('matches the route when the visitor holds the capability', () => {
     setup(true, ['GESTOR']);
-    const result = TestBed.runInInjectionContext(() => permissionGuard('manageUsers')({} as Route, []));
+    const result = TestBed.runInInjectionContext(() =>
+      permissionGuard('manageUsers')({} as Route, [], {} as PartialMatchRouteSnapshot),
+    );
     expect(result).toBe(true);
   });
 
   it('redirects to /home when the visitor lacks it', () => {
     setup(true, ['STUDENT']);
-    const tree = asUrlTree(TestBed.runInInjectionContext(() => permissionGuard('manageUsers')({} as Route, [])));
+    const tree = asUrlTree(
+      TestBed.runInInjectionContext(() =>
+        permissionGuard('manageUsers')({} as Route, [], {} as PartialMatchRouteSnapshot),
+      ),
+    );
     expect(tree.toString()).toBe('/home');
   });
 
@@ -108,7 +114,9 @@ describe('permissionGuard', () => {
   it('keeps a GESTOR out of the ADMIN-only global config', () => {
     setup(true, ['GESTOR']);
     const tree = asUrlTree(
-      TestBed.runInInjectionContext(() => permissionGuard('editGlobalConfig')({} as Route, []))
+      TestBed.runInInjectionContext(() =>
+        permissionGuard('editGlobalConfig')({} as Route, [], {} as PartialMatchRouteSnapshot),
+      )
     );
     expect(tree.toString()).toBe('/home');
   });

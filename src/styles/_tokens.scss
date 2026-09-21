@@ -18,6 +18,38 @@
   --radius-lg: 0px;
 
   color-scheme: light;
+
+  // @2026-p4-fe/ui reads its own token namespace (--bg-surface,
+  // --accent-*, --border-subtle, ...), which we never define — every
+  // generic-* component silently resolves them to the empty string.
+  // Aliasing onto our own --color-* here (instead of importing the
+  // library's theme.css) keeps a single source of truth and avoids
+  // theme.css also overwriting --color-surface/--color-danger/etc,
+  // which the remaining fu-* components still depend on.
+  --bg-app: var(--color-bg);
+  --bg-surface: var(--color-surface);
+  --bg-surface-alt: var(--color-surface-2);
+  --border-subtle: var(--color-border);
+  --border-highlight: var(--color-border-strong);
+  --text-primary: var(--color-text);
+  --text-muted: var(--color-text-muted);
+  --accent-primary: var(--color-primary);
+  --accent-secondary: var(--color-cyan);
+  --accent-gold: var(--color-gold);
+  --accent-danger: var(--color-danger);
+  --accent-success: var(--color-success);
+  --accent-primary-fill: var(--color-primary);
+  --accent-secondary-fill: var(--color-cyan);
+  --accent-gold-fill: var(--color-gold);
+  --accent-danger-fill: var(--color-danger);
+  --accent-success-fill: var(--color-success);
+
+  // The library reads its own font namespace too. Left undefined, its
+  // buttons and badges fall back to the inherited body font instead of the
+  // arcade face; map them onto ours so they match the remaining fu-* ones.
+  --font-arcade: var(--font-display);
+  --font-retro: var(--font-display);
+  --font-pixel: var(--font-sans);
 }
 
 :root[data-theme='dark'] {
